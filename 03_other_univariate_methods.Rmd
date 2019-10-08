@@ -1,0 +1,53 @@
+---
+title: "Other methods"
+subtitle: "Wasser Cluster Lunz, Lunz am See"
+author: "Aurélien Boyé"
+date: "08/10/2019"
+output:
+  xaringan::moon_reader:
+    css: ["default", "theme.css", "theme-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      countIncrementalSlides: true
+      highlithLines: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo = F}
+knitr::opts_chunk$set(
+  comment = "#",
+  collapse = TRUE,
+  #cache = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width=6, fig.height=6,
+  fig.align = 'center'
+)
+```
+
+```{r, include = FALSE}
+if (!require(knitr)) install.packages("knitr")
+library(knitr)
+```
+
+# Quantile regressions
+
+Package `quantreg`
+
+# Boosted regression trees
+
+Package `dismo``
+
+# Multivariate boosted regression trees
+
+Package `mvtboost`
+
+The [package](https://cran.r-project.org/web/packages/mvtboost/mvtboost.pdf)
+ 
+The [ref](https://arxiv.org/abs/1511.02025)
+
+# Random forest
+
+Package `randomForest`

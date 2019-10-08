@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Linear Models and Mixed Models</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Aurélien Boyé" />
+    <meta name="date" content="2019-08-10" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="theme.css" type="text/css" />
+    <link rel="stylesheet" href="theme-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Linear Models and Mixed Models
+## Wasser Cluster Lunz, Lunz am See
+### Aurélien Boyé
+### 08/10/2019
+
+---
+
+
+
+
+
+
+# A brief reminder
+
+.large[
+`$$Y_{i} = \beta_{0} + \beta_{1} x_{i1} + \cdots + \beta_{p} x_{ip} + \epsilon_{i}$$`
+]
+
+.pull-left[
+- `\(Y_i\)` is the response variable
+- `\(β_0\)` is the intercept of the regression line
+- `\(β_p\)` is the coefficient of variation for the *nth* explanatory variable
+- `\(x_{ip}\)` is the *nth* explanatory variable
+- `\(ε_i\)` are the residuals of the model
+]
+
+.pull-right[
+
+
+&lt;img src="images/linear_regression_1.png" width="450" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Assumptions
+
+
+.large[
+`$$Y_{i} = \beta_{0} + \beta_{1} x_{i1} + \cdots + \beta_{p} x_{ip} + \epsilon_{i}$$`
+]
+
+
+.pull-left[
+
+1. The residuals are independent
+2. The residuals are normally distributed
+3. The residuals have a mean of 0
+4. The residuals are homoskedastic (they have constant variance)
+
+]
+
+.pull-right[
+
+&lt;img src="images/linear_regression_2.png" width="400" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+.center[
+
+.comment[These assumptions concern the residuals, not the response or explanatory variables]
+
+]
+
+---
+
+# Multiple linear regression
+
+**Generalization of simple linear regression**
+
+.center[
+.large[
+`$$Y_i = \alpha + \beta_1x_{1i}+\beta_2x_{2i}+\beta_3x_{3i}+...+\beta_kx_{ki} + \epsilon$$`
+]
+]
+
+&amp;nbsp;
+
+- **Response variable** `\(\Rightarrow\)` 1 continuous variable
+- **Explanatory variables** `\(\Rightarrow\)` 2 or more continuous variables
+
+&amp;nbsp;
+
+**Assumptions** (.small[*In addition to the usual assumptions of linear models*])
+- Linear relationship between each explanatory variable and response variable
+- Explanatory variables are orthogonal (.alert[No collinearity])
+  - Collinearity produces unstable parameters estimate and large `\(se\)` for the linear terms
+
+---
+
+# Workflow
+
+.small[
+
+1. **Plot the data**
+2. **Create the model** `\(\Rightarrow\)` select your variables
+    - Hypotheses (which predictors? form of the relationships?)
+    - Collinearity among predictors
+    - Stepwise regression analysis / Ranking models
+3. **Test the model assumptions** 
+    - Check the residuals
+4. **Adjust the model if assumptions are violated**
+    - Transform response variable
+    - Use other tools (e.g. Generalised Linear Models)
+5. **Interpret the results**
+    - `\(R^2\)` and significance
+    - Regression parameters and effect size estimates
+    - Visualize the model
+
+]
+
+---
+
+# Workflow
+
+
+&lt;img src="images/Zuur_2010.png" width="600" style="display: block; margin: auto;" /&gt;
+
+&amp;nbsp;
+
+&lt;img src="images/Zuur_2016.png" width="600" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[Accessible [here](http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2009.00001.x/full) and [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12577) (with R code in the supplementary material!)]
+
+---
+
+class: inverse, center, middle
+
+background-image: url("images/r_transition.png")
+background-size: cover
+
+---
+
+# The iris dataset
+
+
+```r
+# Load the data
+data(iris)
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Sepal.Length &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Sepal.Width &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Petal.Length &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Petal.Width &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Species &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+```r
+summary(iris, digits = 2)
+#   Sepal.Length  Sepal.Width   Petal.Length  Petal.Width        Species  
+#  Min.   :4.3   Min.   :2.0   Min.   :1.0   Min.   :0.1   setosa    :50  
+#  1st Qu.:5.1   1st Qu.:2.8   1st Qu.:1.6   1st Qu.:0.3   versicolor:50  
+#  Median :5.8   Median :3.0   Median :4.3   Median :1.3   virginica :50  
+#  Mean   :5.8   Mean   :3.1   Mean   :3.8   Mean   :1.2                  
+#  3rd Qu.:6.4   3rd Qu.:3.3   3rd Qu.:5.1   3rd Qu.:1.8                  
+#  Max.   :7.9   Max.   :4.4   Max.   :6.9   Max.   :2.5
+```
+
+---
+
+# 1. Plot the data
+
+.pull-left[
+
+
+```r
+# A glimpse of the data
+library(ggplot2)
+
+ggplot(data = iris, 
+    mapping = aes(x = Petal.Length, 
+                  y = Petal.Width, 
+                  color = Species)) + 
+  geom_point()
+```
+
+&lt;img src="images/iris_versicolor.jpg" width="300" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# 2. Create the model : collinearity ?
+
+
+```r
+# Correlation among the potential predictors of Petal Width
+var_cor &lt;- cor(iris[,1:3], method = "pearson", use="pairwise.complete.obs")
+
+var_cor
+#              Sepal.Length Sepal.Width Petal.Length
+# Sepal.Length    1.0000000  -0.1175698    0.8717538
+# Sepal.Width    -0.1175698   1.0000000   -0.4284401
+# Petal.Length    0.8717538  -0.4284401    1.0000000
+```
+
+.pull-left[
+
+
+```r
+# Graphical representation
+library(ggcorrplot)
+
+ggcorrplot(var_cor, 
+  hc.order = TRUE, 
+  type = "upper", 
+  lab = FALSE, 
+  method="circle", 
+  colors = c("tomato2", "white", 
+             "springgreen3"))
+
+```
+]
+
+.pull-right[
+&lt;img src="01_LM_LMM_files/figure-html/corplot-out-1.png" width="300px" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+# 2. Create the model : collinearity ?
+
+- **Variance Inflation Factors** (VIF) quantify the extent of correlation between each predictor and the other predictors in the model.
+
+`$$VIF = \frac{1}{1-R^2}$$`
+
+- Variables with .alert[VIF &gt; 5] are usually considered collinear.
+
+- Can be computed using the `vif()` function of package `car` or using functions from the `usdm` (.small[*Uncertainty Analysis for Species Distribution Models*]) package : `vif()` or `vifcor()` or `vifstep()` and `exclude()`
+
+
+```r
+# Collinearity among the potential predictors of Petal Width
+usdm::vif(iris[,1:3])
+#      Variables      VIF
+# 1 Sepal.Length 6.256954
+# 2  Sepal.Width 1.839639
+# 3 Petal.Length 7.557780
+```
+
+---
+
+# 2. Starting simple
+
+
+```r
+mod &lt;- lm(Petal.Width ~ Petal.Length, data = iris)
+```
+
+.pull-left[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+
+```r
+# Diagnostic of the residuals
+par(mfrow=c(2,2))
+plot(mod)
+```
+]
+
+.pull-right[
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+
+
+---
+
+# Residuals vs fitted
+
+This plot shows if residuals have non-linear patterns. If you find equally spread residuals around a horizontal line without distinct patterns, that is a good indication you don’t have non-linear relationships.
+
+&amp;nbsp;
+
+&lt;img src="images/residuals_1.jpg" width="700" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Normal Q-Q
+
+Are residuals normally distributed ? It’s good if residuals are lined well on the straight dashed line.
+
+&amp;nbsp;
+
+&lt;img src="images/residuals_2.jpg" width="700" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Scale-Location
+
+Also called Spread-Location plot. This plot shows if residuals are spread equally along the ranges of predictors. This is how you can check the assumption of equal variance (homoscedasticity). It’s good if you see a horizontal line with equally (randomly) spread points.
+
+&amp;nbsp;
+
+&lt;img src="images/residuals_3.jpg" width="700" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Residuals vs Leverage
+
+Influential outliers ? We watch out for outlying values at the upper right corner or at the lower right corner. Look for cases outside of a dashed line, Cook’s distance.
+
+&lt;img src="images/residuals_4.jpg" width="700" style="display: block; margin: auto;" /&gt;
+
+--
+
+.alert[You should never remove outliers if you don't have good reasons to do so (ex: error of measurement) and if you do so, say it !]
+
+---
+
+# Back to our model
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-18-1.png" width="500" style="display: block; margin: auto;" /&gt;
+
+--
+
+.comment[**NOTE**: The `gvlma()` function from `gvlma` package offers a way to automatically check all the major assumptions of linear models]
+
+---
+
+
+```r
+gvlma::gvlma(mod)
+# 
+# Call:
+# lm(formula = Petal.Width ~ Petal.Length, data = iris)
+# 
+# Coefficients:
+#  (Intercept)  Petal.Length  
+#      -0.3631        0.4158  
+# 
+# 
+# ASSESSMENT OF THE LINEAR MODEL ASSUMPTIONS
+# USING THE GLOBAL TEST ON 4 DEGREES-OF-FREEDOM:
+# Level of Significance =  0.05 
+# 
+# Call:
+#  gvlma::gvlma(x = mod) 
+# 
+#                      Value   p-value                   Decision
+# Global Stat        50.9304 2.308e-10 Assumptions NOT satisfied!
+# Skewness            3.2230 7.261e-02    Assumptions acceptable.
+# Kurtosis            2.3321 1.267e-01    Assumptions acceptable.
+# Link Function       0.1196 7.295e-01    Assumptions acceptable.
+# Heteroscedasticity 45.2557 1.729e-11 Assumptions NOT satisfied!
+```
+
+---
+
+# May be not so bad in that case
+
+.pull-left[
+
+
+```r
+ggplot(data = iris, 
+    mapping = aes(x = Petal.Length, 
+                  y = Petal.Width)) + 
+  geom_point() +
+  geom_smooth(method ="lm")
+```
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-lm-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# May be not so bad in that case
+
+
+```r
+d &lt;- iris
+d$predicted &lt;- predict(mod) # Save the predicted values
+d$residuals &lt;- residuals(mod) # Save the residual values
+```
+
+.pull-left[
+
+
+```r
+ggplot(data = d, 
+   mapping = aes(x = Petal.Length, 
+                 y = Petal.Width)) +
+ geom_smooth(method = "lm", se = FALSE, 
+             color = "lightgrey") + 
+ geom_segment(aes(xend = Petal.Length, 
+                  yend = predicted), 
+              alpha = .2) +
+ geom_point(aes(color = abs(residuals), 
+              size = abs(residuals))) + 
+ scale_color_continuous(low = "blue", 
+                        high = "red") +
+ guides(color = FALSE, size = FALSE) + 
+ geom_point(aes(y = predicted), 
+            shape = 1) +
+ theme_linedraw()
+```
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-lm-out2-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# 5. Interpretation of the outputs
+
+
+```r
+summary(mod)
+# 
+# Call:
+# lm(formula = Petal.Width ~ Petal.Length, data = iris)
+# 
+# Residuals:
+#      Min       1Q   Median       3Q      Max 
+# -0.56515 -0.12358 -0.01898  0.13288  0.64272 
+# 
+# Coefficients:
+#               Estimate Std. Error t value Pr(&gt;|t|)    
+# (Intercept)  -0.363076   0.039762  -9.131  4.7e-16 ***
+# Petal.Length  0.415755   0.009582  43.387  &lt; 2e-16 ***
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Residual standard error: 0.2065 on 148 degrees of freedom
+# Multiple R-squared:  0.9271,	Adjusted R-squared:  0.9266 
+# F-statistic:  1882 on 1 and 148 DF,  p-value: &lt; 2.2e-16
+```
+
+
+---
+
+# 5. Interpretation of the outputs
+
+.left-column[
+
+
+**Estimates**
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+**Standard Error**
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+**t-value**
+]
+
+.right-column[
+
+- For the intercept: expected value when all the features are at 0 `\(\Rightarrow\)` meaning ? (.comment[centering predictors]) 
+
+- For the predictors: expected change in the response due to a unit change in the predictor (.comment[standardizing predictors]) 
+
+&amp;nbsp;
+
+- The standard error of the estimates `\(\Rightarrow\)` allow to construct marginal confidence intervals for the estimates, which is given by `\(\hat{\beta}_i\pm 2\cdot se(\hat{\beta}_i)\)` for the 95% confidence interval
+
+&amp;nbsp;
+
+- `\(t = \frac{\hat{\beta}_i - 0}{se(\hat{\beta}_i)}\)` `\(\Rightarrow\)` tells us about how far our estimated parameter is from a hypothesized 0 value
+
+]
+
+---
+
+# 5. Interpretation of the outputs
+
+
+```r
+mod$coef
+#  (Intercept) Petal.Length 
+#   -0.3630755    0.4157554
+
+summary(mod)$coef
+#                Estimate  Std. Error   t value     Pr(&gt;|t|)
+# (Intercept)  -0.3630755 0.039761990 -9.131221 4.699798e-16
+# Petal.Length  0.4157554 0.009582436 43.387237 4.675004e-86
+
+confint(mod)
+#                   2.5 %     97.5 %
+# (Intercept)  -0.4416501 -0.2845010
+# Petal.Length  0.3968193  0.4346915
+
+summary(mod)$r.squared
+# [1] 0.9271098
+
+summary(mod)$adj.r.squared
+# [1] 0.9266173
+```
+
+---
+
+# 5. Interpretation of the outputs
+
+- **Centering the predictors**
+
+The slopes between the predictors and the response variable doesn’t change but .alert[the interpretation of the intercept does].
+
+--
+
+&amp;nbsp;
+
+.pull-left[
+**Before centering**
+
+.small[
+Intercept = mean of the response when all predictors == 0
+]
+]
+
+.pull-right[
+**After centering**
+
+.small[
+Intercept = mean of the response when all predictors are at their mean
+]
+]
+
+&amp;nbsp;
+
+.comment[
+
+1. Do we want to interpret the intercept ?
+
+2. Is 0 meaningful ?
+
+2. Is the mean meaningful ? `\(\Rightarrow\)` center on other values ?
+
+]
+
+---
+
+# 5. Interpretation of the outputs
+
+- **Standardizing the predictors**
+
+The coefficients estimated are now standardized slopes, meaning that the units of the regression coefficients are the same 
+
+&amp;nbsp;
+
+--
+
+.pull-left[
+**Before standardizing**
+
+.small[
+Slopes = expected change in the response due to a unit change in the predictor
+]
+]
+
+.pull-right[
+**After standardizing**
+
+.small[
+Slopes = expected change in the response due to a change of one **standard deviation** in the predictor
+]
+]
+
+--
+
+&amp;nbsp;
+
+.comment[
+.small[
+
+**Standardized** coefficients are comparable within models and between studies `\(\Rightarrow\)` standardized effect size estimates (.alert[but beware of the range covered for of each variable])
+
+**Unstandardized** effect size estimates may be more meaningful in some context because they depend on the phenotypic variation in each study population
+]
+]
+
+---
+
+# Centered vs standardized predictors
+
+
+```r
+
+# Initial model
+mod &lt;- lm(Petal.Width ~ Petal.Length + Sepal.Width, data = iris)
+
+# Model with centered variables
+iris_cent &lt;- iris
+iris_cent[,c("Petal.Length","Sepal.Width")] &lt;-
+  scale(iris_cent[,c("Petal.Length","Sepal.Width")], 
+        center = TRUE, scale = FALSE) 
+
+mod_cent &lt;- lm(Petal.Width ~ Petal.Length + Sepal.Width, data = iris_cent)
+
+# Model with standardized variables
+iris_stand &lt;- iris
+iris_stand[,c("Petal.Length","Sepal.Width")] &lt;-
+  scale(iris_stand[,c("Petal.Length","Sepal.Width")], 
+        center = TRUE, scale = TRUE) 
+
+mod_stand &lt;- lm(Petal.Width ~ Petal.Length + Sepal.Width, data = iris_stand)
+```
+
+---
+
+# Centered vs standardized predictors
+
+
+```r
+par(mfrow=c(2,2))
+plot(mod)
+```
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Centered vs standardized predictors
+
+
+```r
+par(mfrow=c(2,2))
+plot(mod_cent)
+```
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Centered vs standardized predictors
+
+
+```r
+par(mfrow=c(2,2))
+plot(mod_stand)
+```
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Centered vs standardized predictors
+
+
+```r
+
+summary(mod)$coef
+#                 Estimate Std. Error   t value     Pr(&gt;|t|)
+# (Intercept)  -0.70647784 0.15133409 -4.668332 6.783158e-06
+# Petal.Length  0.42627010 0.01044680 40.803902 4.566537e-82
+# Sepal.Width   0.09939647 0.04231048  2.349216 2.014365e-02
+
+summary(mod_cent)$coef
+#                Estimate Std. Error   t value      Pr(&gt;|t|)
+# (Intercept)  1.19933333 0.01660774 72.215305 1.036337e-116
+# Petal.Length 0.42627010 0.01044680 40.803902  4.566537e-82
+# Sepal.Width  0.09939647 0.04231048  2.349216  2.014365e-02
+
+summary(mod_stand)$coef
+#                Estimate Std. Error   t value      Pr(&gt;|t|)
+# (Intercept)  1.19933333 0.01660774 72.215305 1.036337e-116
+# Petal.Length 0.75249386 0.01844171 40.803902  4.566537e-82
+# Sepal.Width  0.04332357 0.01844171  2.349216  2.014365e-02
+```
+
+
+---
+
+# Centered vs standardized predictors
+
+.pull-left[
+
+&amp;nbsp;
+
+&lt;img src="images/coef_raw.png" width="700" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/coef_cent_intercept.png" width="700" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.footnote[
+See the function `ggcoef()`from the `GGally` package
+]
+
+---
+
+# Centered vs standardized predictors
+
+.pull-left[
+
+&amp;nbsp;
+
+&lt;img src="images/coef_raw.png" width="700" style="display: block; margin: auto;" /&gt;
+
+&amp;nbsp;
+
+&lt;img src="images/coef_cent.png" width="700" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/coef_cent_intercept.png" width="700" style="display: block; margin: auto;" /&gt;
+
+&amp;nbsp;
+
+&lt;img src="images/coef_stand.png" width="700" style="display: block; margin: auto;" /&gt;
+]
+
+.footnote[
+See the function `ggcoef()`from the `GGally` package
+]
+
+---
+
+# Centered vs standardized predictors
+
+&amp;nbsp;
+
+- This applies to Linear Mixed Models (LMM), Generalized Linear Models (GLM) and  Generalized Linear Mixed Models (GLMM)
+
+--
+
+&amp;nbsp;
+
+&lt;img src="images/Schielzeth_2010.png" width="800" style="display: block; margin: auto;" /&gt;
+
+.footnote[Accessible [here](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/j.2041-210X.2010.00012.x)]
+
+
+---
+
+class: inverse, center, middle
+
+# Reality is often more complex
+
+## *Interactions, mixed models and random factors*
+
+---
+
+# A more complicated example
+
+.pull-left[
+
+&amp;nbsp;
+
+
+```r
+ggplot(data = iris, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point()
+```
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-sepal-1-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# A more complicated example
+
+.pull-left[
+
+&amp;nbsp;
+
+
+```r
+ggplot(data = iris, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point() +
+  geom_smooth(aes(x = Sepal.Length, 
+                  y = Sepal.Width), 
+              inherit.aes = FALSE, 
+              method = "lm", 
+              col = "black")
+```
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-sepal-2-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# A more complicated example
+
+.pull-left[
+
+&amp;nbsp;
+
+
+```r
+ggplot(data = iris, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point() +
+  geom_smooth(aes(fill = Species), 
+              method = "lm")
+```
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-36-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# A more complicated example
+
+.pull-left[
+
+&amp;nbsp;
+
+
+```r
+ggplot(data = iris, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point() +
+  geom_smooth(aes(fill = Species), 
+              method = "lm")
+```
+
+&amp;nbsp;
+
+.comment[
+
+`\(\Rightarrow\)` **Need to account for this structure in the data**
+
+]
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-38-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+# Interaction terms
+
+**Interaction** : The effect of one factor depends on the level of the other `\(\Rightarrow\)` the effect of the factor is larger (for a positive coefficient) or smaller (for a negative coefficient) when the other is above its mean.
+
+--
+
+
+```r
+lm(Sepal.Width ~ Sepal.Length*Species, data=iris)$coef
+#                    (Intercept)                   Sepal.Length 
+#                     -0.5694327                      0.7985283 
+#              Speciesversicolor               Speciesvirginica 
+#                      1.4415786                      2.0157381 
+# Sepal.Length:Speciesversicolor  Sepal.Length:Speciesvirginica 
+#                     -0.4788090                     -0.5666378
+```
+
+.small[
+1. Intercept 
+2. The slope betwen `length` and `width`
+3. The difference between the mean of *Setosa* and *Versicolor* when `length` is 0
+5. The change in the slope `width~length` between *Setosa* and *Versicolor* species
+]
+
+---
+
+
+```r
+lm(Sepal.Width ~ Sepal.Length*Species, data=iris)$coef
+#                    (Intercept)                   Sepal.Length 
+#                     -0.5694327                      0.7985283 
+#              Speciesversicolor               Speciesvirginica 
+#                      1.4415786                      2.0157381 
+# Sepal.Length:Speciesversicolor  Sepal.Length:Speciesvirginica 
+#                     -0.4788090                     -0.5666378
+
+lm(Sepal.Width ~ Sepal.Length*Species - 1, data=iris)$coef
+#                   Sepal.Length                  Speciessetosa 
+#                      0.7985283                     -0.5694327 
+#              Speciesversicolor               Speciesvirginica 
+#                      0.8721460                      1.4463054 
+# Sepal.Length:Speciesversicolor  Sepal.Length:Speciesvirginica 
+#                     -0.4788090                     -0.5666378
+
+lm(Sepal.Width ~ Sepal.Length + Species + Sepal.Length:Species - 1, data=iris)$coef
+#                   Sepal.Length                  Speciessetosa 
+#                      0.7985283                     -0.5694327 
+#              Speciesversicolor               Speciesvirginica 
+#                      0.8721460                      1.4463054 
+# Sepal.Length:Speciesversicolor  Sepal.Length:Speciesvirginica 
+#                     -0.4788090                     -0.5666378
+```
+
+---
+
+# Interaction terms
+
+.pull-left[
+
+
+```r
+
+library(dplyr)
+
+mod &lt;- lm(Sepal.Width ~ 
+            Sepal.Length*Species, 
+          data=iris)
+
+d &lt;- iris %&gt;%
+  mutate(fit = predict(mod))
+
+ggplot(data = d, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point() +
+  geom_line(aes(y=fit))
+
+```
+
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-41-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Interaction terms
+
+
+```r
+lm(Sepal.Width ~ Sepal.Length, data=iris %&gt;% filter(Species == "versicolor"))$coef
+#  (Intercept) Sepal.Length 
+#    0.8721460    0.3197193
+
+lm(Sepal.Width ~ Sepal.Length*Species - 1, data=iris)$coef
+#                   Sepal.Length                  Speciessetosa 
+#                      0.7985283                     -0.5694327 
+#              Speciesversicolor               Speciesvirginica 
+#                      0.8721460                      1.4463054 
+# Sepal.Length:Speciesversicolor  Sepal.Length:Speciesvirginica 
+#                     -0.4788090                     -0.5666378
+```
+
+--
+
+**Note**:
+
+.small[
+
+- This changes the residuals (3 instead of 1)
+
+- Advantage of interaction terms when multiple explanatory variables to control which interactions are included
+
+- Harness the power of *contrasts* (more on contrasts [here](https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/), [here](https://rstudio-pubs-static.s3.amazonaws.com/65059_586f394d8eb84f84b1baaf56ffb6b47f.html) and [here](https://bbolker.github.io/mixedmodels-misc/notes/contrasts.pdf))
+
+]
+
+---
+
+# But...
+
+.pull-left[
+
+.small[
+
+.comment[3 linear models (one per species)]
+
+- Estimate 3 intercepts and 3 slopes (and we only have one predictor and species-level variations `\(\Rightarrow\)` sites ?)
+  
+- Reduced sample sizes `\(\Rightarrow\)` lower power
+
+]
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-43-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# But...
+
+.pull-left[
+
+.small[
+
+.comment[3 linear models (one per species)]
+
+- Estimate 3 intercepts and 3 slopes (and we only have one predictor and species-level variations `\(\Rightarrow\)` sites ?)
+  
+- Reduced sample sizes `\(\Rightarrow\)` lower power
+
+.comment[If we lump everything]
+
+- Bigger sample size
+
+- Pseudoreplication ?
+
+- Confounding factors ?
+
+]
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-sepal-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# But...
+
+.pull-left[
+
+
+.small[
+
+.comment[3 linear models (one per species)]
+
+- Estimate 3 intercepts and 3 slopes (and we only have one predictor and species-level variations `\(\Rightarrow\)` sites ?)
+  
+- Reduced sample sizes `\(\Rightarrow\)` lower power
+
+.comment[If we lump everything]
+
+- Bigger sample size
+
+- Pseudoreplication ?
+
+- Confounding factors ?
+
+]
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&lt;img src="01_LM_LMM_files/figure-html/iris-plot-sepal-out-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+&amp;nbsp;
+
+.center[
+
+`\(\Rightarrow\)` **Need something to control for this factor**
+
+]
+
+---
+
+# Fixed versus random effect
+
+--
+
+.comment[Previously, we used `species` as a **fixed effect**]
+
+- Fixed: results in the estimation of **6 parameters** (3 intercepts and 3 slopes)
+
+- We wish to make conclusions about the levels of the factor from which the data come from
+
+- Implies that we consider that the data comes from all possible levels of the factor
+
+
+---
+
+# Fixed versus random effect
+
+.comment[Alternatively, we can use `species` as a **random effect**]
+
+--
+
+- Grouping factor `\(\Rightarrow\)` we want to control for it, but are not really interested in the effect of each individual levels of the factor
+
+
+--
+
+- The data includes only a random sample of all possible levels of the factor
+
+
+--
+
+- Intercepts and/or slopes are allowed to vary according to the random factor .comment[but estimate fewer parameters than classical regression]
+
+
+--
+
+- Intercepts, slopes and their confidence interval are adjusted to take into account the data structure `\(\Rightarrow\)` .comment[uses all the data available while accounting for pseudoreplication and controlling for differences among species]
+
+--
+
+&amp;nbsp;
+
+.center[
+
+**Linear Mixed Models** `\(\Rightarrow\)` balance between separating and lumping
+
+]
+
+---
+
+# Random intercept models
+
+.pull-left[
+
+&amp;nbsp;
+
+- Assume that the intercepts come from a normal distribution 
+- Only need to estimate the mean and standard deviation of the normal distribution (instead of 3 intercepts, i.e. one for each species)
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/random_intercept.png" width="900" style="display: block; margin: auto;" /&gt;
+
+]
+
+&amp;nbsp;
+
+**Note**: The more levels your factor has, the more accurately the mean and standard deviation of the normal distribution will be estimated `\(^1\)`
+
+.footnote[
+`\(^1\)` Three levels may be a little low, but easier to visualize!
+]
+
+---
+
+# Random intercept models
+
+
+```r
+
+library(lme4)
+
+rand_int_mod &lt;- lmer(Sepal.Width ~ Sepal.Length + (1|Species), data = iris)
+
+library(nlme)
+
+rand_int_mod2 &lt;- lme(Sepal.Width ~ Sepal.Length, random = ~1|Species, data = iris)
+```
+
+--
+
+.small[
+**Note**:
+
+- `lme4` is somehow an extension to `nlme`. 
+- `lme4` better handles huge number of random effects (parts coded in *C*)
+- `nlme` allows to specify the variance-covariance matrix for the random effects, which you cannot do in `lme4`
+
+`\(\Rightarrow\)` **`nlme` offers a much broader class of covariance structures for the random effects but the flexibility of lme4 is sufficient for most applications**
+
+]
+
+---
+
+# Random intercept models
+
+&amp;nbsp;
+
+.pull-left[
+
+&amp;nbsp;
+
+
+```r
+d &lt;- iris %&gt;%
+  mutate(fit = predict(rand_int_mod))
+
+ggplot(data = d, 
+    mapping = aes(x = Sepal.Length, 
+                  y = Sepal.Width, 
+                  color = Species)) + 
+  geom_point() +
+  geom_line(aes(y=fit))
+
+```
+
+]
+
+.pull-right[
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-46-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+# Random slope models
+
+.pull-left[
+
+&amp;nbsp;
+
+- The same principle applies to **slopes** (just more difficult to visualize)
+
+- As for intercepts, only the mean and standard deviation of the slopes are estimated (instead of 3 distinct slopes)
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/random_slope.png" width="900" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+
+```r
+# With lme4
+rand_slope_mod &lt;- lmer(Sepal.Width ~ Sepal.Length + 
+                      (0 + Sepal.Length|Species), 
+                      data = iris)
+```
+
+---
+
+# Random intercept and slope models
+
+.pull-left[
+
+&amp;nbsp;
+
+- Combining both random slopes and random intercepts
+
+- Estimates 4 parameters
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/random_int_slope.png" width="900" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+
+```r
+# With lme4
+rand_mod &lt;- lmer(Sepal.Width ~ Sepal.Length + 
+                      (1 + Sepal.Length|Species), 
+                      data = iris)
+
+# Or
+rand_mod &lt;- lmer(Sepal.Width ~ Sepal.Length + 
+                      (Sepal.Length|Species), 
+                      data = iris)
+```
+
+
+---
+
+class: center
+
+### Summary of random effects
+
+.small[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Formula &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Alternative &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Meaning &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (1 | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1+(1|g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Random intercept with mean and sd to be estimated from the data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0+offset(o)+(1|g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; -1+offset(o)+(1|g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Random intercept with a priori means to specify &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (1 | g1/g2) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; (1 | g1)+(1 | g1:g2) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nested random effects: intercept varying among g1 and g2 within g1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (1 | g1) + (1 | g2) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1 + (1 | g1) + (1 | g2) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Intercept varying among g1 and g2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; x + (x | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1 + x + (1 + x | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Correlated random intercept and slope &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; x + (x || g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1 + x + (1 | g) + (0 + x | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Uncorrelated random intercept and slope &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; x + (0 + x | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1 + x + (-1 + x | g) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Random slope without random intercept &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+
+# LMM take into account data structure
+
+.pull-left[
+
+&amp;nbsp;
+
+If a certain species is poorly represented (low n) in the data, the model will give more weight to the pooled model to estimate the intercept and slope of that species or lake.
+
+]
+
+.pull-right[
+
+&amp;nbsp;
+
+&lt;img src="images/low_representation.png" width="900" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# LMM take into account data structure
+
+.small[
+The confidence intervals for the intercepts and slopes are adjusted to take account of the pseudo-replication using intraclass correlation coefficient (ICC)
+]
+
+.pull-left[
+
+.small[
+
+- **High ICC**: points from the same species are treated as a single observation because they are very correlated `\(\Rightarrow\)` small effective sample size and large confidence intervals for slope and intercept
+
+
+- **Low ICC**: treated as independent observations because little correlated `\(\Rightarrow\)` large effective sample size and small confidence intervals for slope and intercept
+
+]
+]
+
+.pull-right[
+
+&lt;img src="images/ICC.png" width="250" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Note on estimation methods
+
+&amp;nbsp;
+
+REML (Restricted Maximum Likelihood) is the default method in `lmer`
+
+&amp;nbsp;
+
+**Note**:
+
+- The standard deviation estimator in the Maximum Likelihood (ML) is biased by a factor of `\((n-2) / n\)`. The REML method corrects this bias and gives a correct estimator for the standard deviation $\Rightarrow $ we should compare **nested random effect models with REML**
+
+- REML assumes that the fixed effects structure is correct while ML doesn’t rely on the coefficients of the fixed effect$\Rightarrow$ we should compare **nested fixed effect models with ML **
+
+---
+
+# Model selection
+
+&amp;nbsp;
+
+.large[
+
+1. Build a full "fixed" model
+
+2. Select the best random structure (`REML = TRUE`)
+
+3. Select the fixed terms with the selected random structure (`REML = FALSE`)
+
+4. Report the model with `REML = TRUE`
+
+]
+
+---
+
+# Step 1 &amp; 2: choosing the random structure
+
+
+```r
+mod1 &lt;- gls(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, data = iris, 
+            method = "REML")
+
+mod2 &lt;- lme(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, 
+            random = ~ 1|Species, data = iris, method = "REML")
+
+mod3 &lt;- lme(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, 
+            random = ~ Sepal.Length|Species, data = iris, method = "REML")
+
+mod4 &lt;- lme(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, 
+            random = ~ Sepal.Length + Petal.Length|Species, data = iris,
+            method = "REML")
+
+mod5 &lt;- lme(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, 
+            random = list(~Sepal.Length | Species, ~Petal.Length|Species),
+            data = iris, method = "REML")
+```
+
+Note the use of `gls()`
+
+---
+
+# Step 1 &amp; 2: choosing the random structure
+
+.pull-left[
+
+```r
+summary(mod4)
+# Linear mixed-effects model fit by REML
+#  Data: iris 
+#        AIC      BIC    logLik
+#   80.69843 125.0358 -25.34922
+# 
+# Random effects:
+#  Formula: ~Sepal.Length + Petal.Length | Species
+#  Structure: General positive-definite, Log-Cholesky parametrization
+#              StdDev       Corr         
+# (Intercept)  3.381777e-07 (Intr) Spl.Ln
+# Sepal.Length 1.597900e-01 0.963        
+# Petal.Length 1.640217e-07 0.000  0.000 
+# Residual     2.530128e-01              
+# 
+# Fixed effects: Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length 
+#                                            Value Std.Error  DF   t-value
+# (Intercept)                           -0.5909245 0.8956273 140 -0.659788
+# Sepal.Length                           0.6528371 0.2042967 140  3.195534
+# Petal.Width                            0.6367383 1.1394579 140  0.558808
+# Petal.Length                           0.0237779 0.4851697 140  0.049009
+# Sepal.Length:Petal.Width              -0.0925613 0.1975922 140 -0.468446
+# Sepal.Length:Petal.Length             -0.0349742 0.0742155 140 -0.471252
+# Petal.Width:Petal.Length               0.1097754 0.2099677 140  0.522820
+# Sepal.Length:Petal.Width:Petal.Length -0.0018235 0.0317247 140 -0.057479
+#                                       p-value
+# (Intercept)                            0.5105
+# Sepal.Length                           0.0017
+# Petal.Width                            0.5772
+# Petal.Length                           0.9610
+# Sepal.Length:Petal.Width               0.6402
+# Sepal.Length:Petal.Length              0.6382
+# Petal.Width:Petal.Length               0.6019
+# Sepal.Length:Petal.Width:Petal.Length  0.9542
+#  Correlation: 
+#                                       (Intr) Spl.Ln Ptl.Wd Ptl.Ln Sp.L:P.W
+# Sepal.Length                          -0.789                              
+# Petal.Width                           -0.162  0.181                       
+# Petal.Length                          -0.713  0.406 -0.340                
+# Sepal.Length:Petal.Width               0.212 -0.326 -0.942  0.362         
+# Sepal.Length:Petal.Length              0.776 -0.567  0.300 -0.958 -0.257  
+# Petal.Width:Petal.Length               0.598 -0.336 -0.485 -0.588  0.344  
+# Sepal.Length:Petal.Width:Petal.Length -0.689  0.537  0.556  0.534 -0.535  
+#                                       S.L:P.L P.W:P.
+# Sepal.Length                                        
+# Petal.Width                                         
+# Petal.Length                                        
+# Sepal.Length:Petal.Width                            
+# Sepal.Length:Petal.Length                           
+# Petal.Width:Petal.Length               0.556        
+# Sepal.Length:Petal.Width:Petal.Length -0.592  -0.923
+# 
+# Standardized Within-Group Residuals:
+#         Min          Q1         Med          Q3         Max 
+# -3.08911757 -0.53760746  0.05151053  0.62415344  2.73234806 
+# 
+# Number of Observations: 150
+# Number of Groups: 3
+```
+]
+
+.pull-right[
+
+```r
+summary(mod5)
+# Linear mixed-effects model fit by REML
+#  Data: iris 
+#        AIC      BIC    logLik
+#   80.31892 124.6563 -25.15946
+# 
+# Random effects:
+#  Formula: ~Sepal.Length | Species
+#  Structure: General positive-definite, Log-Cholesky parametrization
+#              StdDev       Corr  
+# (Intercept)  3.000241e-07 (Intr)
+# Sepal.Length 1.430343e-01 0.98  
+# 
+#  Formula: ~Petal.Length | Species %in% Species
+#  Structure: General positive-definite, Log-Cholesky parametrization
+#              StdDev       Corr  
+# (Intercept)  0.6123510743 (Intr)
+# Petal.Length 0.0003968833 0.011 
+# Residual     0.2518727448       
+# 
+# Fixed effects: Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length 
+#                                            Value Std.Error  DF    t-value
+# (Intercept)                           -0.8682897 1.1724403 140 -0.7405833
+# Sepal.Length                           0.6983992 0.2299040 140  3.0377866
+# Petal.Width                            0.6185501 1.2516222 140  0.4941987
+# Petal.Length                          -0.0229059 0.5289283 140 -0.0433063
+# Sepal.Length:Petal.Width              -0.0925074 0.2165423 140 -0.4272023
+# Sepal.Length:Petal.Length             -0.0282916 0.0824448 140 -0.3431582
+# Petal.Width:Petal.Length               0.1954691 0.2572389 140  0.7598736
+# Sepal.Length:Petal.Width:Petal.Length -0.0145929 0.0401443 140 -0.3635106
+#                                       p-value
+# (Intercept)                            0.4602
+# Sepal.Length                           0.0028
+# Petal.Width                            0.6219
+# Petal.Length                           0.9655
+# Sepal.Length:Petal.Width               0.6699
+# Sepal.Length:Petal.Length              0.7320
+# Petal.Width:Petal.Length               0.4486
+# Sepal.Length:Petal.Width:Petal.Length  0.7168
+#  Correlation: 
+#                                       (Intr) Spl.Ln Ptl.Wd Ptl.Ln Sp.L:P.W
+# Sepal.Length                          -0.818                              
+# Petal.Width                           -0.340  0.347                       
+# Petal.Length                          -0.707  0.519 -0.109                
+# Sepal.Length:Petal.Width               0.372 -0.460 -0.953  0.128         
+# Sepal.Length:Petal.Length              0.757 -0.654  0.057 -0.966 -0.024  
+# Petal.Width:Petal.Length               0.615 -0.469 -0.586 -0.664  0.482  
+# Sepal.Length:Petal.Width:Petal.Length -0.677  0.617  0.640  0.626 -0.624  
+#                                       S.L:P.L P.W:P.
+# Sepal.Length                                        
+# Petal.Width                                         
+# Petal.Length                                        
+# Sepal.Length:Petal.Width                            
+# Sepal.Length:Petal.Length                           
+# Petal.Width:Petal.Length               0.653        
+# Sepal.Length:Petal.Width:Petal.Length -0.681  -0.950
+# 
+# Standardized Within-Group Residuals:
+#         Min          Q1         Med          Q3         Max 
+# -3.10617253 -0.53868940  0.06525582  0.60778699  2.70849593 
+# 
+# Number of Observations: 150
+# Number of Groups: 
+#                Species Species.1 %in% Species 
+#                      3                      3
+```
+]
+
+---
+
+# Step 1 &amp; 2: choosing the random structure
+
+
+```r
+anova(mod1, mod2, mod3, mod4, mod5)
+#      Model df      AIC      BIC    logLik   Test   L.Ratio p-value
+# mod1     1  9 81.04199 107.6444 -31.52100                         
+# mod2     2 10 70.98957 100.5478 -25.49479 1 vs 2 12.052422  0.0005
+# mod3     3 12 74.69843 110.1684 -25.34922 2 vs 3  0.291137  0.8645
+# mod4     4 15 80.69843 125.0358 -25.34922 3 vs 4  0.000000  1.0000
+# mod5     5 15 80.31892 124.6563 -25.15946
+
+wiqid::AICtable(MuMIn::AICc(mod1, mod2, mod3, mod4, mod5), digits=3, sort = TRUE)
+#      df   AICc  Delta ModelLik ModelWt
+# mod2 10 72.572  0.000    1.000   0.889
+# mod3 12 76.976  4.404    0.111   0.098
+# mod1  9 82.328  9.755    0.008   0.007
+# mod5 15 83.901 11.329    0.003   0.003
+# mod4 15 84.281 11.708    0.003   0.003
+```
+
+--
+
+.small[
+
+- AICc corrects for bias created by small sample sizes
+
+- Models with `\(\Delta AIC &lt; 2\)` are often considered equally plausible
+
+- To go further: model averaging (see [here](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/ecm.1309) and the function `MuMIn::model.avg()`)
+
+]
+
+---
+
+# Step 3: select the fixed structure
+
+
+```r
+mod_sel &lt;- mod2 &lt;- lme(Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length, 
+                       random = ~ 1|Species, data = iris, method = "ML")
+
+mod.step &lt;- MASS::stepAIC(mod_sel)
+# Start:  AIC=46.49
+# Sepal.Width ~ Sepal.Length * Petal.Width * Petal.Length
+# 
+#                                         Df    AIC
+# - Sepal.Length:Petal.Width:Petal.Length  1 44.503
+# &lt;none&gt;                                     46.493
+# 
+# Step:  AIC=44.5
+# Sepal.Width ~ Sepal.Length + Petal.Width + Petal.Length + Sepal.Length:Petal.Width + 
+#     Sepal.Length:Petal.Length + Petal.Width:Petal.Length
+# 
+#                             Df    AIC
+# - Sepal.Length:Petal.Length  1 42.716
+# &lt;none&gt;                         44.503
+# - Petal.Width:Petal.Length   1 45.603
+# - Sepal.Length:Petal.Width   1 45.776
+# 
+# Step:  AIC=42.72
+# Sepal.Width ~ Sepal.Length + Petal.Width + Petal.Length + Sepal.Length:Petal.Width + 
+#     Petal.Width:Petal.Length
+# 
+#                            Df    AIC
+# &lt;none&gt;                        42.716
+# - Petal.Width:Petal.Length  1 44.676
+# - Sepal.Length:Petal.Width  1 59.232
+```
+
+---
+
+# Step 3: select the fixed structure
+
+
+```r
+summary(mod.step)
+# Linear mixed-effects model fit by maximum likelihood
+#  Data: iris 
+#        AIC      BIC    logLik
+#   42.71584 66.80092 -13.35792
+# 
+# Random effects:
+#  Formula: ~1 | Species
+#         (Intercept)  Residual
+# StdDev: 4.43568e-06 0.2645075
+# 
+# Fixed effects: Sepal.Width ~ Sepal.Length + Petal.Width + Petal.Length + Sepal.Length:Petal.Width +      Petal.Width:Petal.Length 
+#                               Value Std.Error  DF    t-value p-value
+# (Intercept)              -0.1403268 0.5342693 142  -0.262652  0.7932
+# Sepal.Length              0.9280679 0.1183534 142   7.841495  0.0000
+# Petal.Width               1.1813834 0.3449788 142   3.424510  0.0008
+# Petal.Length             -0.7168600 0.0625998 142 -11.451483  0.0000
+# Sepal.Length:Petal.Width -0.3610832 0.0830148 142  -4.349624  0.0000
+# Petal.Width:Petal.Length  0.3050397 0.0490387 142   6.220388  0.0000
+#  Correlation: 
+#                          (Intr) Spl.Ln Ptl.Wd Ptl.Ln S.L:P.
+# Sepal.Length             -0.988                            
+# Petal.Width              -0.843  0.847                     
+# Petal.Length              0.530 -0.625 -0.646              
+# Sepal.Length:Petal.Width  0.839 -0.857 -0.856  0.471       
+# Petal.Width:Petal.Length -0.527  0.592  0.484 -0.396 -0.831
+# 
+# Standardized Within-Group Residuals:
+#          Min           Q1          Med           Q3          Max 
+# -2.986602751 -0.703862289 -0.006857551  0.629587350  2.398171786 
+# 
+# Number of Observations: 150
+# Number of Groups: 3
+```
+
+---
+
+# Step 4: report the selected model
+
+
+```r
+mod.step$call
+# lme.formula(fixed = Sepal.Width ~ Sepal.Length + Petal.Width + 
+#     Petal.Length + Sepal.Length:Petal.Width + Petal.Width:Petal.Length, 
+#     data = iris, random = ~1 | Species, method = "ML")
+
+mod_fin &lt;- lme(fixed = Sepal.Width ~ Sepal.Length + Petal.Width + 
+    Petal.Length + Sepal.Length:Petal.Width + Petal.Width:Petal.Length,
+    data = iris, random = ~1 | Species, method = "REML")
+```
+
+---
+
+# Step 4: report the selected model
+
+
+```r
+summary(mod_fin)
+# Linear mixed-effects model fit by REML
+#  Data: iris 
+#        AIC      BIC    logLik
+#   59.53009 83.28859 -21.76504
+# 
+# Random effects:
+#  Formula: ~1 | Species
+#         (Intercept)  Residual
+# StdDev:    0.777436 0.2532275
+# 
+# Fixed effects: Sepal.Width ~ Sepal.Length + Petal.Width + Petal.Length + Sepal.Length:Petal.Width +      Petal.Width:Petal.Length 
+#                               Value Std.Error  DF   t-value p-value
+# (Intercept)              -1.1063065 0.7086478 142 -1.561151  0.1207
+# Sepal.Length              0.8050300 0.1161948 142  6.928280  0.0000
+# Petal.Width               1.8989195 0.3660615 142  5.187433  0.0000
+# Petal.Length             -0.3144389 0.1218586 142 -2.580360  0.0109
+# Sepal.Length:Petal.Width -0.3404485 0.0811364 142 -4.196001  0.0000
+# Petal.Width:Petal.Length  0.1595246 0.0746195 142  2.137842  0.0342
+#  Correlation: 
+#                          (Intr) Spl.Ln Ptl.Wd Ptl.Ln S.L:P.
+# Sepal.Length             -0.583                            
+# Petal.Width              -0.673  0.583                     
+# Petal.Length             -0.078 -0.546  0.124              
+# Sepal.Length:Petal.Width  0.534 -0.848 -0.659  0.387       
+# Petal.Width:Petal.Length -0.052  0.567 -0.030 -0.747 -0.697
+# 
+# Standardized Within-Group Residuals:
+#         Min          Q1         Med          Q3         Max 
+# -3.31440991 -0.49914220  0.02050157  0.60620272  2.61964953 
+# 
+# Number of Observations: 150
+# Number of Groups: 3
+```
+
+---
+
+# Check the model
+
+
+```r
+plot(mod_fin)
+```
+
+&lt;img src="01_LM_LMM_files/figure-html/unnamed-chunk-62-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# `\(R^2\)` of Linear Mixed Models
+
+&amp;nbsp;
+
+**Marginal `\(R^2\)`**: proportion of variance explained by the fixed factor(s) alone
+
+**Conditional `\(R^2\)`**: proportion of variance explained by both the fixed and random factors
+
+&amp;nbsp;
+
+
+```r
+piecewiseSEM::rsquared(mod_fin)
+#      Response   family     link method  Marginal Conditional
+# 1 Sepal.Width gaussian identity   none 0.2396782   0.9270714
+```
+
+.footnote[
+- Nakagawa, S., and H. Schielzeth. 2013. A general and simple method for obtaining `\(R^2\)` from generalized linear mixed-effects models. Methods in Ecology and Evolution 4(2): 133-142. DOI: [10.1111/j.2041-210x.2012.00261.x](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210x.2012.00261.x)
+
+- Johnson, Paul C.D. 2014. Extension of Nakagawa &amp; Schielzeth’s R2GLMM to random slopes models. Methods in Ecology and Evolution. DOI: [10.1111/2041-210X.12225.](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12225)
+
+]
+
+---
+
+# Random effects models
+
+Used to estimate variance components (see [here](http://essedunet.nsd.uib.no/cms/topics/multilevel/ch3/1.html) for more info) 
+
+
+```r
+mod1 &lt;- lme(Sepal.Width ~ 1, random = ~ 1|Species,data = iris)
+mod2 &lt;- lme(Sepal.Length ~ 1, random = ~ 1|Species,data = iris)
+
+ape::varcomp(mod1, scale = TRUE)
+#   Species    Within 
+# 0.4906278 0.5093722 
+# attr(,"class")
+# [1] "varcomp"
+ape::varcomp(mod2, scale = TRUE)
+#   Species    Within 
+# 0.7028488 0.2971512 
+# attr(,"class")
+# [1] "varcomp"
+```
+
+Can be used with nested scales (e.g. [Messier et al. 2010](https://onlinelibrary.wiley.com/doi/10.1111/j.1461-0248.2010.01476.x
+))
+
+
+```r
+model &lt;-  lme(reef_cover ~ 1, random=~1|site_name/quadrat, data=surveys_cleaned)
+
+```
+
+---
+
+class: center, inverse, middle
+
+# Exercises
+
+---
+
+# Scenario 1
+
+* You have inventoried species richness **in 1000 quadrats** that are within **10 different sites** which are also within **10 different forests**.
+
+* You also **measured productivity** in each **quadrat**.
+
+* You want to know if productivity is a good predictor of biodiversity
+
+.alert[What mixed model could you use for this dataset?]
+
+&amp;nbsp;
+
+--
+
+# 
+
+&amp;nbsp;
+
+
+```r
+lmer(Biodiv ~ Productivity + (1 | Forest / Site))
+```
+
+Here the random effects are nested (i.e. Sites within forest) and not crossed
+
+---
+
+# Scenario 2
+
+* You have collected **200 fish** from **12 different sites** evenly distributed across **4 habitat types** that are found within **the same lake**.
+
+* You measured **the length of each fish** and the **amount of mercury in its tissue**.
+
+* You want to know if habitat is a good predictor of mercury concentration and how it influences mercury accumulation
+
+.alert[What mixed model could you use for this dataset?]
+
+&amp;nbsp;
+
+--
+
+# 
+
+&amp;nbsp;
+
+
+```r
+lmer(Mercury ~ Length * Habitat_Type + (1 | Site))
+```
+
+---
+
+# Practice
+
+.center[
+
+## Dataset you are working on ?
+
+or 
+
+## Lake data
+
+Q : Does fish trophic position increase with fish size for all three fish species?
+
+&amp;nbsp;
+
+&lt;img src="images/lake_data.png" width="600" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: center
+
+## Ressources
+
+&amp;nbsp;
+
+.pull-left[
+
+&lt;img src="images/book_zuur.jpg" width="300" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+&lt;img src="images/harrison_2018.png" width="500" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+
+```r
+
+sessionInfo()
+# R version 3.5.0 (2018-04-23)
+# Platform: x86_64-apple-darwin15.6.0 (64-bit)
+# Running under: macOS  10.14.6
+# 
+# Matrix products: default
+# BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+# LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+# 
+# locale:
+# [1] fr_FR.UTF-8/fr_FR.UTF-8/fr_FR.UTF-8/C/fr_FR.UTF-8/fr_FR.UTF-8
+# 
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+# [1] nlme_3.1-137     lme4_1.1-17      Matrix_1.2-14    ggcorrplot_0.1.3
+# [5] ggplot2_3.2.1    gvlma_1.0.0.3    dplyr_0.8.3      knitr_1.24      
+# 
+# loaded via a namespace (and not attached):
+#  [1] Rcpp_1.0.2         ape_5.3            lattice_0.20-35   
+#  [4] assertthat_0.2.1   digest_0.6.20      truncnorm_1.0-8   
+#  [7] cellranger_1.1.0   R6_2.4.0           MuMIn_1.43.6      
+# [10] plyr_1.8.4         HDInterval_0.2.0   stats4_3.5.0      
+# [13] evaluate_0.14      coda_0.19-3        xaringan_0.12     
+# [16] highr_0.7          pillar_1.4.2       rlang_0.4.0       
+# [19] readxl_1.1.0       lazyeval_0.2.2     curl_4.1          
+# [22] minqa_1.2.4        data.table_1.12.2  car_3.0-0         
+# [25] raster_3.0-2       nloptr_1.0.4       rmarkdown_1.15    
+# [28] labeling_0.3       splines_3.5.0      wiqid_0.2.2       
+# [31] stringr_1.4.0      foreign_0.8-70     munsell_0.5.0     
+# [34] compiler_3.5.0     xfun_0.9           pkgconfig_2.0.2   
+# [37] htmltools_0.3.6    tidyselect_0.2.5   tibble_2.1.3      
+# [40] rio_0.5.10         codetools_0.2-15   crayon_1.3.4      
+# [43] withr_2.1.2        MASS_7.3-49        grid_3.5.0        
+# [46] gtable_0.3.0       usdm_1.1-18        magrittr_1.5      
+# [49] scales_1.0.0       zip_1.0.0          carData_3.0-1     
+# [52] stringi_1.4.3      reshape2_1.4.3     sp_1.3-1          
+# [55] piecewiseSEM_2.0.2 openxlsx_4.1.0     tools_3.5.0       
+# [58] forcats_0.3.0      glue_1.3.1         purrr_0.3.2       
+# [61] hms_0.4.2          pbkrtest_0.4-7     abind_1.4-5       
+# [64] parallel_3.5.0     yaml_2.2.0         colorspace_1.4-1  
+# [67] haven_2.1.1
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"countIncrementalSlides": true,
+"highlithLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

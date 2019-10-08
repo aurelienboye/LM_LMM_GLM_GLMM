@@ -1,0 +1,61 @@
+---
+title: "Generalized linear models"
+subtitle: "Wasser Cluster Lunz, Lunz am See"
+author: "Aurélien Boyé"
+date: "08/10/2019"
+output:
+  xaringan::moon_reader:
+    css: ["default", "theme.css", "theme-fonts.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      countIncrementalSlides: true
+      highlithLines: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo = F}
+knitr::opts_chunk$set(
+  comment = "#",
+  collapse = TRUE,
+  #cache = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width=6, fig.height=6,
+  fig.align = 'center'
+)
+```
+
+```{r, include = FALSE}
+if (!require(knitr)) install.packages("knitr")
+library(knitr)
+```
+
+# Different ways to write the same model
+
+#### Option 1
+
+.center[
+
+$y_{i} = \beta_{0} + \beta_{1} x_{i} + \epsilon_{i}$
+
+$\epsilon_{i} \sim N(0,\sigma^2)$
+
+]
+
+#### Option 2 (GLM folks)
+
+.center[
+
+$y_{i} \sim N(\mu_{i},\sigma^2)$
+
+$\mu_{i} = \beta_{0} + \beta_{1} x_{i}$
+
+$\epsilon_{i} \sim N(0,\sigma^2)$
+
+]
+
+---
+
+# Why be normal ? Or linear ?

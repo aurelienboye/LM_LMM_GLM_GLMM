@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570109321698.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D9132507",
+    "lastKnownWriteTime" : 1570368308,
+    "last_content_update" : 1570368308186,
+    "path" : "~/Documents/Boulot/Cours/Cours_Autriche_2019/LM_LMM_GLM_GLMM/01_LM_LMM.Rmd",
+    "project_path" : "01_LM_LMM.Rmd",
+    "properties" : {
+        "chunk_output_type" : "console",
+        "cursorPosition" : "1693,1",
+        "docOutlineVisible" : "0",
+        "scrollLine" : "1669"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

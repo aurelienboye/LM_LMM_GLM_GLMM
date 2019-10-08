@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Generalized Linear Models</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Aurélien Boyé" />
+    <meta name="date" content="2019-08-10" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link rel="stylesheet" href="theme.css" type="text/css" />
+    <link rel="stylesheet" href="theme-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Generalized Linear Models
+## Wasser Cluster Lunz, Lunz am See
+### Aurélien Boyé
+### 08/10/2019
+
+---
+
+
+
+
+
+
+# Assumptions of Linear Models
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+--
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+--
+
+1. If nonlinear terms are additive fit with OLS (polynomial regressions)
+2. Transform? But think about what it will do to error 
+3. Nonlinear Least Squares 
+4. Generalized Linear Models &amp; Mixed Models (GLM/GLMM)
+
+---
+
+# Assumptions of Linear Models
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+1. .comment[**If nonlinear terms are additive fit with OLS (polynomial regressions)**]
+2. Transform? But think about what it will do to error 
+3. Nonlinear Least Squares 
+4. Generalized Linear Models &amp; Mixed Models (GLM/GLMM)
+
+---
+
+# Polynomial regressions
+
+&amp;nbsp;
+
+.large[
+`$$Y_{i} = \beta_{0} + \beta_{1} x_{i} + \beta_{2} x_{i}^2 + \cdots + \epsilon_{i}$$`
+]
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Degree &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Name &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Example &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Constant &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(3\) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Linear &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(x+9\) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quadratic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(x^2-x+4\) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Cubic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(x^3-x^2+5\) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quartic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(6x^4-x^3+x-2\) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quintic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; \(x^5-3x^3+x^2+8\) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+
+# Polynomial regressions
+
+&amp;nbsp;
+
+
+```r
+poly_reg &lt;- lm(y ~ x + I(xˆ2) + I(xˆ3), data=data)
+# or
+poly_reg &lt;- lm(y ~ poly(x, degree = 3), data=data)
+```
+
+&amp;nbsp;
+
+- However, note that `x`, `I(xˆ2)`, `I(xˆ3)` will be correlated if they are not centered variables ([Schielzeth, 2010](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2010.00012.x)), which can cause problems. 
+
+- The use of `poly()` avoid this by producing orthogonal polynomials.
+
+- In general, if a higher order term is included (e.g. a quadratic term), the lower order terms (e.g. the intercept and linear terms) must also be in the model. This is known as the “principle of marginality”.
+
+---
+
+# Polynomial regressions
+
+&amp;nbsp;
+
+.center[
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-4-1.png" height="500" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Assumptions of Linear Models
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+1. If nonlinear terms are additive fit with OLS (polynomial regressions)
+2. .comment[**Transform? But think about what it will do to error**]
+3. Nonlinear Least Squares 
+4. Generalized Linear Models &amp; Mixed Models (GLM/GLMM)
+
+---
+
+# Transformations
+
+&lt;img src="images/Ohara_kotze_2010.png" width="650" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+"When the error structure of data is simple, a transformation (usually a log or power-transformation) can be quite useful to improve the ability of a model to fit to the data by stabilizing variances or by making relationships linear before applying simple linear regression"
+
+"However, a transformation is not guaranteed to solve these problems: there may be a trade-off between homoscedasticity and linearity, or the family of transformations used may not be able to correct one or both of these problems"
+
+]
+
+.footnote[
+See the article [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2010.00021.x) and the blog post by Jarrett Byrnes [Do Not Log-Transform Count Data, Bitches!](https://www.r-bloggers.com/do-not-log-transform-count-data-bitches/)
+]
+
+---
+
+# Transformations 
+
+**Common transformations**
+- log(y)
+- log(y) and log(x) (power function)
+- arcsin(sqrt(y)) for bounded data
+- logit for bounded dat `car::logit()`
+- Box-Cox Transform `MASS::boxcox()`
+
+--
+
+**Illustration of the issue with error**
+.center[
+`\(log(MetabolicRate) = log(a) + b \times log(mass) + error\)` 
+
+implies
+
+`\(MetabolicRate = a \times mass^b \times e^{error}\)` 
+
+but what we often want is
+
+`\(MetabolicRate = a \times mass^b + error\)`
+]
+
+---
+
+# Assumptions of Linear Models
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+1. If nonlinear terms are additive fit with OLS (polynomial regressions)
+2. Transform? But think about what it will do to error
+3. .comment[**Nonlinear Least Squares**] 
+4. Generalized Linear Models &amp; Mixed Models (GLM/GLMM)
+
+---
+
+# Nonlinear Least Squares fitting
+
+
+```r
+mod &lt;- nls(metab_rate~a*mass^b, data = my_data,
+           start = list(a=0.02, b=0.7))
+```
+
+&lt;img src="images/nls.png" width="650" style="display: block; margin: auto;" /&gt;
+
+- Least square method for fitting
+- Very flexible
+- .alert[Must specify start values]
+
+---
+
+# Assumptions of Linear Models
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+1. If nonlinear terms are additive fit with OLS (polynomial regressions)
+2. Transform? But think about what it will do to error
+3. Nonlinear Least Squares
+4. Generalized Linear Models &amp; Mixed Models (GLM/GLMM)
+
+---
+
+# Assumptions of Linear Models
+
+.alert[
+
+1. **Linearity**
+2. **Residuals**:
+  - Independent
+  - Equal variance
+  - Normally distributed
+
+]
+
+.large[
+**But life is not always linear so what to do ?**
+]
+
+1. If nonlinear terms are additive fit with OLS (polynomial regressions)
+2. Transform? But think about what it will do to error
+3. Nonlinear Least Squares
+4. .alert[Generalized Linear Models &amp; Mixed Models (GLM/GLMM)]
+
+---
+
+# Assumptions on the residuals
+
+
+```r
+mites &lt;- read.csv('data/mites.csv')
+head(mites,3)
+#   Galumna pa totalabund        prop SubsDens WatrCont Substrate Shrub
+# 1       8  1        140 0.057142857    39.18   350.15   Sphagn1   Few
+# 2       3  1        268 0.011194030    54.99   434.81    Litter   Few
+# 3       1  1        186 0.005376344    46.07   371.72 Interface   Few
+#      Topo
+# 1 Hummock
+# 2 Hummock
+# 3 Hummock
+```
+
+This dataset is a subset of the 'Oribatid mite dataset'
+
+.small[
+&gt; `library(vegan); data(mite)` `\(\Rightarrow\)` 70 moss and mite samples
+&gt;
+&gt; 5 environmental measurements and abundance of the mite *Galumna sp.*
+]
+
+**Goal**: Model the abundance (`abund`), occurrence (`pa`), and proportion (`prop`) of Galumna as a function of the 5 environmental variables.
+
+---
+
+# Assumptions on the residuals
+
+A negative relationship between `Galumna` and water `content`?
+
+
+```r
+  par(mfrow = c(1, 3), cex = 1.4)
+  plot(Galumna ~ WatrCont, data = mites, xlab = 'Water content', ylab='Abundance')
+  boxplot(WatrCont ~ pa, data = mites, xlab='Presence/Absence', ylab = 'Water content')
+  plot(prop ~ WatrCont, data = mites, xlab = 'Water content', ylab='Proportion')
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Assumptions on the residuals
+
+Fit linear models to test whether `abund`, `pa`, and/or `prop` varies as a function of water content.
+
+--
+
+```r
+lm.abund &lt;- lm(Galumna ~ WatrCont, data = mites)
+lm.pa &lt;- lm(pa ~ WatrCont, data = mites)
+lm.prop &lt;- lm(prop ~ WatrCont, data = mites)
+```
+
+--
+.pull-left[
+
+```r
+# p-values
+summary(lm.abund)$coefficients[, 4]
+#  (Intercept)     WatrCont 
+# 3.981563e-08 1.206117e-05
+summary(lm.pa)$coefficients[, 4]
+#  (Intercept)     WatrCont 
+# 6.030252e-12 4.676755e-08
+summary(lm.prop)$coefficients[, 4]
+#  (Intercept)     WatrCont 
+# 4.977432e-08 1.665437e-05
+```
+]
+.pull-right[
+&amp;nbsp;
+
+Significant relationship in all models!
+
+.alert[But...]
+]
+
+---
+
+# Assumptions on the residuals
+
+Look at that error for the abundance ! 
+
+.pull-left[
+
+```r
+plot(Galumna ~ WatrCont, data = mites)
+abline(lm.abund)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+par(mfrow = c(2, 2), cex = 1.4)
+plot(lm.abund)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Assumptions on the residuals
+
+It's not better for the proportion `prop`:
+
+.pull-left[
+
+```r
+plot(prop ~ WatrCont, data = mites)
+abline(lm.prop)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+par(mfrow = c(2, 2), cex = 1.4)
+plot(lm.prop)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Assumptions on the residuals
+
+It's getting even worse for presence/absence `pa`:
+
+.pull-left[
+
+```r
+plot(pa ~ WatrCont, data = mites)
+abline(lm.pa)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+par(mfrow = c(2, 2), cex = 1.4)
+plot(lm.pa)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+class: inverse, center, middle
+
+# Why be normal?
+
+## *Your data is ok;*
+## *it's the model that's wrong*
+
+---
+
+# Different ways to write the same model
+
+#### Option 1
+
+.center[
+
+`\(y_{i} = \beta_{0} + \beta_{1} x_{i} + \epsilon_{i}\)`
+
+`\(\epsilon_{i} \sim N(0,\sigma^2)\)`
+
+]
+
+#### Option 2 
+
+.center[
+
+`\(y_{i} \sim N(\mu_{i},\sigma^2)\)` 
+
+`\(\mu_{i} = \beta_{0} + \beta_{1} x_{i}\)` 
+
+`\(\epsilon_{i} \sim N(0,\sigma^2)\)`
+
+]
+
+&amp;nbsp;
+
+This means that `\(y_i\)` is drawn from a normal distribution with parameters `\(\mu\)` (which depends on `\(x_i\)`) and `\(\sigma\)` (which has the same value for all `\(Y\)`s)
+
+---
+
+# Lets predict Galumna abundance 
+
+We need regression coefficients ( `\(\beta\)`) and `\(\sigma\)`:
+
+
+```r
+coef(lm.abund)
+#  (Intercept)     WatrCont 
+#  3.439348672 -0.006044788
+summary(lm.abund)$sigma
+# [1] 1.513531
+```
+
+What are the parameters of the normal distribution used to model `\(y\)` when water content = 300?
+
+`\(y_i \sim N(\mu = \beta_0 + \beta_1 X_i, \sigma^2)\)`
+
+--
+
+`\(\mu = 3.44 + (-0.006 \times 300) = 1.63\)`
+
+`\(\sigma = 1.51\)`
+
+---
+
+# Lets predict Galumna abundance
+
+- At `\(x = 300\)`, residuals should follow a normal distribution with `\(\mu = 1.63\)` and `\(\sigma^2 = 1.51\)`.
+
+- At `\(x = 400\)`, we get `\(\mu = 1.02\)` and `\(\sigma^2 = 1.51\)`, etc.
+
+&lt;br&gt;
+Graphically, this is our model:
+
+--
+.pull-left[
+.center[
+&lt;img src="images/modelPredic.png" width="650" style="display: block; margin: auto;" /&gt;
+]]
+--
+.pull-right[
+**Problems**:
+- `\(\sigma^2\)` is not homogeneous, yet `lm()` forces a constant `\(\sigma^2\)`
+- Predicted values should be integers and positive
+]
+
+---
+
+# Different ways to write the same model
+
+#### Option 1
+
+.center[
+
+`\(y_{i} = \beta_{0} + \beta_{1} x_{i} + \epsilon_{i}\)`
+
+`\(\epsilon_{i} \sim N(0,\sigma^2)\)`
+
+]
+
+#### Option 2 
+
+.center[
+
+`\(y_{i} \sim N(\mu_{i},\sigma^2)\)` 
+
+`\(\mu_{i} = \beta_{0} + \beta_{1} x_{i}\)` 
+
+`\(\epsilon_{i} \sim N(0,\sigma^2)\)`
+
+]
+
+&amp;nbsp;
+
+This means that `\(y_i\)` is drawn from a normal distribution with parameters `\(\mu\)` (which depends on `\(x_i\)`) and `\(\sigma\)` (which has the same value for all `\(Y\)`s)
+
+---
+
+# Generalized linear models
+
+Generalized linear models (GLMs) build on this approach. In general, they can be written as :
+
+.center[
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)` **(2)**
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
+
+]
+
+--
+
+where `\(D()\)` is a distribution, with mean `\(\mu_i\)` and the variance depending on `\(\phi\)` 
+
+--
+
+.small[
+
+- The error distribution `\(D()\)` is from the exponential family (*e.g.* Normal, Poisson, Binomial...)
+
+]
+
+---
+
+# Some common distributions
+
+**Normal distribution**
+
+.large[
+
+`$$f(x)={\frac {1}{\sigma {\sqrt {2\pi }}}}\operatorname {e} ^{-{\frac {1}{2}}\left({\frac {x-\mu }{\sigma }}\right)^{2}}$$`
+]
+
+Two parameters: 
+
+- `\(\mu = E(x)\)`
+- `\(\sigma^2 = Var(x)\)`
+
+---
+
+# Some common distributions
+
+**Normal distribution**
+
+&amp;nbsp;
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Some common distributions
+
+**Poisson distribution**
+
+&amp;nbsp;
+
+`$$P(X=k) = \frac{\lambda^k}{k!}e^{-\lambda}$$`
+
+with a single parameter
+
+`$$\lambda=E(X)=Var(X)$$`
+
+---
+
+# Some common distributions
+
+**Poisson distribution**
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Some common distributions
+
+**Bernouilli distribution**
+
+`$$P(X=k)=p^{k}(1-p)^{1-k}$$` with `$$k\in \{0,1\}$$`
+
+- Only two possible outcomes in its range: success (`1`) or failure (`0`)
+- One parameter, `\(p\)`, the probability of success
+
+---
+
+# Some common distributions
+
+**Bernouilli distribution**
+
+&amp;nbsp;
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+
+We can use the Bernouilli distribution to calculate the probability Galumna present (`1`) vs. absent (`0`)
+
+---
+
+# Some common distributions
+
+**Binomial distribution** 
+
+`$$P(X=k)={n \choose k}\,p^{k}(1-p)^{n-k}$$`
+
+When there are multiple trials (each with a success/failure), the Bernoulli distribution expands into the binomial
+- Additional parameter, n, for number of trials
+- Predicts the probability of observing a given proportion of successes, p, out of a known total number of trials, `\(n\)`
+
+---
+
+# Some common distributions
+
+**Binomial distribution** 
+
+&amp;nbsp;
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Generalized linear models
+
+Generalized linear models (GLMs) build on this approach. In general, they can be written as :
+
+.center[
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)` **(2)**
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
+
+]
+
+where `\(D()\)` is a distribution, with mean `\(\mu_i\)` and the variance depending on `\(\phi\)` 
+
+.small[
+
+- The error distribution `\(D()\)` is from the exponential family (*e.g.* Normal, Poisson, Binomial...)
+
+]
+
+--
+
+.small[
+
+- The variance `\(\phi\)` is a function of the fitted values `\(var(Y_i) = \theta V(\mu_i)\)` and it may be constant (Poisson distribution) or estimated from the data (Normal distribution)
+  - For the Normal distribution `\(var(\mu_i) = \theta \times 1\)` as `\(V(\mu_i)=1\)` so that `\(\phi = \sigma^2\)`
+  - For the Poisson distribution  `\(var(\mu_i) = \theta \times \mu_i\)` as `\(V(\mu_i)=\mu_i\)` 
+
+]
+
+
+---
+
+# Generalized linear models
+
+Generalized linear models (GLMs) build on this approach. In general, they can be written as :
+
+.center[
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)` **(2)**
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
+
+]
+
+&amp;nbsp;
+
+--
+
+- The model can be separated into a stochastic (1) and a deterministic (3) part, linked together by equation (2)
+
+
+--
+
+- Equation (3) is the linear part of the model: the covariates affect `\(\eta_i\)`, rather than `\(\mu_i\)`, in a linear way `\(\Rightarrow\)` `\(\mu_i\)` is seen as an invertible and smooth function of the linear predictor `\(g(\mu_i) = \eta_i\)` or `\(\mu_i = g^{-1}(\eta_i)\)`
+
+
+--
+
+- `\(g()\)` is called the **the link function**
+
+
+---
+
+# The link functions
+
+&amp;nbsp;
+
+.pull-left[
+
+.center[
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)` **(2)**
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
+
+]
+]
+
+.pull-right[
+&lt;img src="images/glm_link.png" width="600" style="display: block; margin: auto;" /&gt;
+]
+
+&amp;nbsp;
+
+**Some common links**
+
+- Identity: `\(\mu = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = \alpha + \beta x\)`
+- Log: `\(log(\mu) = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = e^{\alpha + \beta x}\)`
+- Logit: `\(logit(\mu) = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = \frac{e^{\alpha + \beta x}}{1 +e^{\alpha + \beta x}}\)`
+- Inverse: `\(\frac{1}{\mu} = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = (\alpha + \beta x)^{-1}\)`
+
+---
+
+# The link functions
+
+&amp;nbsp;
+
+.pull-left[
+
+.center[
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)` **(2)**
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
+
+]
+]
+
+.pull-right[
+&lt;img src="images/glm_link.png" width="500" style="display: block; margin: auto;" /&gt;
+]
+
+&amp;nbsp;
+
+**Canonical links**
+
+`\(g\)` is called a **canonical link function** when
+
+`$$\gamma'^{-1} \circ g^{-1} = (g\circ \gamma')^{-1} = I$$`
+
+so that `\(g\)` connects `\(\eta\)`, `\(\mu\)`, and `\(\theta\)` such that `\(\theta \equiv \eta\)`
+
+---
+
+# Distributions, Canonical Links, and Dispersion
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Canonical Link &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Variance Function &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; identity &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasipoisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μθ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1−μ) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasibinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1 − μ)θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Negative Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ+kμ^2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Gamma &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; inverse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1/μ2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ3 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+# Regressions are special cases of GLM
+
+.pull-left[
+
+.center[
+
+**Gneralized Linear Models**
+
+`\(y_i \sim D(\mu_i,\phi)~~~~~\)` 
+
+`\(g(\mu_i) = \eta_i~~~~~~~~~~~\)`
+
+`\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)` 
+
+]
+]
+
+.pull-rigth[
+
+**Normal distribution with identity link**
+
+.center[
+
+`\(y_{i} \sim N(\mu_{i},\sigma^2)\)` 
+
+`\(\mu_{i} = \eta_{i}\)`
+
+`\(\mu_{i} = \eta_{i} = \beta_{0} + \beta_{1} x_{i}\)` 
+]
+]
+
+---
+
+# Common GLM
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Names &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Link function &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Applications &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Regression, ANOVA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Identity &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Normal homoscedastic unbounded data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Logistic Regression &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Presence/absence data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Probit Analysis &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; probit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Proportions &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Log-linear model &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Count data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ordinal Regression &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Multinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Multiclass data (factors with multiple states) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+# Distribution and other links
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Links &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; identity, log, inverse &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log, identity, sqrt &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasipoisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log, identity, sqrt &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit, probit, cauchit, log, log-log &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasibinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit, probit, cauchit, log, log-log &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Negative Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log, identity, sqrt &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Gamma &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; inverse, identity, log &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1/μ2, inverse, identity, log &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+class: inverse, center, middle
+
+background-image: url("images/r_transition.png")
+background-size: cover
+
+---
+
+# Exercise 1
+
+&amp;nbsp;
+
+.large[
+.center[
+.comment[
+Build a model of the presence of *Galumna* sp. as a function of water content and topography
+]
+]
+]
+
+&amp;nbsp;
+
+--
+
+**Tip** :
+
+- The `glm()` function
+  - `glm_reg &lt;- glm(formula, data, family)`
+
+- Need to specify two things (`family`):
+  1. probability distribution
+  2. a link function
+
+---
+
+# Exercise 1: Solution
+
+
+```r
+mites &lt;- read.csv("data/mites.csv", header = TRUE)
+str(mites)
+# 'data.frame':	70 obs. of  9 variables:
+#  $ Galumna   : int  8 3 1 1 2 1 1 1 2 5 ...
+#  $ pa        : int  1 1 1 1 1 1 1 1 1 1 ...
+#  $ totalabund: int  140 268 186 286 199 209 162 126 123 166 ...
+#  $ prop      : num  0.05714 0.01119 0.00538 0.0035 0.01005 ...
+#  $ SubsDens  : num  39.2 55 46.1 48.2 23.6 ...
+#  $ WatrCont  : num  350 435 372 360 204 ...
+#  $ Substrate : Factor w/ 7 levels "Barepeat","Interface",..: 4 3 2 4 4 4 4 2 3 4 ...
+#  $ Shrub     : Factor w/ 3 levels "Few","Many","None": 1 1 1 1 1 1 1 2 2 2 ...
+#  $ Topo      : Factor w/ 2 levels "Blanket","Hummock": 2 2 2 2 2 2 2 1 1 2 ...
+```
+
+---
+
+# Exercise 1: Solution
+
+
+```r
+logit.reg &lt;- glm(pa ~ WatrCont + Topo, data=mites, family = binomial(link = "logit"))
+
+summary(logit.reg)
+# 
+# Call:
+# glm(formula = pa ~ WatrCont + Topo, family = binomial(link = "logit"), 
+#     data = mites)
+# 
+# Deviance Residuals: 
+#     Min       1Q   Median       3Q      Max  
+# -2.0387  -0.5589  -0.1594   0.4112   2.0252  
+# 
+# Coefficients:
+#              Estimate Std. Error z value Pr(&gt;|z|)    
+# (Intercept)  4.464402   1.670622   2.672 0.007533 ** 
+# WatrCont    -0.015813   0.004535  -3.487 0.000489 ***
+# TopoHummock  2.090757   0.735348   2.843 0.004466 ** 
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# (Dispersion parameter for binomial family taken to be 1)
+# 
+#     Null deviance: 91.246  on 69  degrees of freedom
+# Residual deviance: 48.762  on 67  degrees of freedom
+# AIC: 54.762
+# 
+# Number of Fisher Scoring iterations: 6
+```
+
+---
+
+# Exercise 1: Solution
+
+
+```r
+library(ggplot2)
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
+  labs(title = "Logistic Regression Model") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-31-1.png" height="350" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Exercise 1: Interpreting the output
+
+
+```r
+summary(logit.reg)$coefficients
+#                Estimate  Std. Error   z value     Pr(&gt;|z|)
+# (Intercept)  4.46440199 1.670622482  2.672299 0.0075333598
+# WatrCont    -0.01581255 0.004535069 -3.486728 0.0004889684
+# TopoHummock  2.09075654 0.735348234  2.843220 0.0044660283
+```
+
+- The output indicates that both water content and topography are significant
+
+- **But how do we interpret the slope coefficients?**
+
+---
+
+# Exercise 1: Interpreting the output
+
+
+Remember we used a logit transformation on the expected values!
+
+`\(\Rightarrow\)` to properly interpret the regression parameters, we have to use a **'reverse' function** :
+
+- The natural exponential function to obtain the **odds**: `\(e^x\)`
+  - An odds ratio represents the ratio of the odds that an event will occur (event = 1) given the presence of the predictor x (x = 1), compared to the odds of the event occurring in the absence of that predictor (x = 0).
+  - Beta coefficient in logistic regressions correspond to the log of the odds ratio for a given predictor
+
+- The inverse logit function to obtain the **probabilities**:
+
+`$$logit^{-1} = \frac{1}{1 + \frac{1}{e^x}}$$`
+
+---
+
+# Exercise 1: Interpreting the output
+
+- **On the odds scale for water content:**
+
+
+```r
+exp(logit.reg$coefficient[2])
+#  WatrCont 
+# 0.9843118
+```
+
+&gt; One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.2
+
+- **On the probability scale for water content:**
+
+
+```r
+1 / (1 + 1/exp(logit.reg$coefficient[2]))
+#  WatrCont 
+# 0.4960469
+```
+
+&gt; One unit increase in water content will decrease the probability of the species occuring (proba &lt; 0.5)
+
+---
+
+# Exercise 1: Interpreting the output
+
+
+```r
+summary(logit.reg)$coefficients
+#                Estimate  Std. Error   z value     Pr(&gt;|z|)
+# (Intercept)  4.46440199 1.670622482  2.672299 0.0075333598
+# WatrCont    -0.01581255 0.004535069 -3.486728 0.0004889684
+# TopoHummock  2.09075654 0.735348234  2.843220 0.0044660283
+```
+
+
+**Note**: 
+
+- Coefficients are rarely interpreted quantitatively in GLM as in LM because it is not as straightforward but see [here](http://environmentalcomputing.net/interpreting-coefficients-in-glms/) for more examples with other distributions
+
+---
+
+# Predictive Power and goodness of fit
+
+Get the pseudo-R², the analogue of the `\(R^2\)` for models fitted by maximum likelihood:
+
+`$$\text{pseudo-R}^2 = \frac{\text{null deviance - residual deviance}}{\text{null deviance}}$$`
+
+&lt;br&gt;
+
+`\(\text{pseudo-R}^2 = \text{variance explained by the model}\)`
+
+---
+
+# Predictive Power and goodness of fit
+
+Comparing deviance of your model (residual deviance) to the deviance of a null model (null deviance)
+
+The **null model** is a model without explanatory variables
+
+```R
+null.model &lt;- glm(Response.variable ~ 1, family = binomial)
+```
+
+---
+
+# Predictive Power and goodness of fit
+
+In R, we can extract the residual and null deviances directly from the glm object:
+
+
+```r
+objects(logit.reg)
+#  [1] "aic"               "boundary"          "call"             
+#  [4] "coefficients"      "contrasts"         "control"          
+#  [7] "converged"         "data"              "deviance"         
+# [10] "df.null"           "df.residual"       "effects"          
+# [13] "family"            "fitted.values"     "formula"          
+# [16] "iter"              "linear.predictors" "method"           
+# [19] "model"             "null.deviance"     "offset"           
+# [22] "prior.weights"     "qr"                "R"                
+# [25] "rank"              "residuals"         "terms"            
+# [28] "weights"           "xlevels"           "y"
+```
+
+
+```r
+pseudoR2 &lt;- (logit.reg$null.deviance - logit.reg$deviance) / logit.reg$null.deviance
+pseudoR2
+# [1] 0.4655937
+```
+
+.comment[Hence, the model explains 46.6% of the variability in the data]
+
+---
+
+# Predictive Power and goodness of fit
+
+
+```r
+# For binomial model only; based on Tjur (2009)
+# devtools::install_version("binomTools", version = "1.0-1")
+binomTools::Rsq(object = logit.reg) 
+# 
+# R-square measures and the coefficient of discrimination, 'D':
+# 
+#      R2mod     R2res     R2cor         D
+#  0.5205221 0.5024101 0.5025676 0.5114661
+# 
+# Number of binomial observations:  70
+# Number of binary observation:  70
+# Average group size:  1
+
+# Based on Nakagawa and Schielzeth (2013) &amp; Jaeger et al. (2016)
+r2glmm::r2beta(logit.reg, partial = FALSE, method = 'nsj')
+#   Effect   Rsq upper.CL lower.CL
+# 1  Model 0.478    0.625     0.33
+r2glmm::r2beta(logit.reg, partial = TRUE, method = 'nsj')
+#        Effect   Rsq upper.CL lower.CL
+# 1       Model 0.478    0.625    0.330
+# 2    WatrCont 0.364    0.528    0.203
+# 3 TopoHummock 0.044    0.179    0.000
+```
+
+---
+
+# Predictive Power and goodness of fit
+
+
+```r
+# Revised statistics based on Nakagawa et al. (2017) paper
+MuMIn::r.squaredGLMM(logit.reg)
+#                   R2m       R2c
+# theoretical 0.7093845 0.7093845
+# delta       0.6483495 0.6483495
+```
+
+---
+
+# Exercise 2: count data
+
+&amp;nbsp;
+
+.large[
+.center[
+.comment[
+Build a model of the **abundance** of *Galumna* sp. as a function of water content and topography
+]
+]
+]
+
+---
+
+# Exercise 2: Solution
+
+
+```r
+glm.poisson &lt;- glm(Galumna ~ WatrCont + Topo, data=mites,
+family = poisson(link = "log"))
+```
+
+---
+
+
+```r
+summary(glm.poisson)
+# 
+# Call:
+# glm(formula = Galumna ~ WatrCont + Topo, family = poisson(link = "log"), 
+#     data = mites)
+# 
+# Deviance Residuals: 
+#     Min       1Q   Median       3Q      Max  
+# -1.8977  -0.9760  -0.6431  -0.1651   4.0743  
+# 
+# Coefficients:
+#              Estimate Std. Error z value Pr(&gt;|z|)    
+# (Intercept)  1.937184   0.449489   4.310 1.63e-05 ***
+# WatrCont    -0.006736   0.001146  -5.877 4.17e-09 ***
+# TopoHummock  0.615095   0.280823   2.190   0.0285 *  
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# (Dispersion parameter for poisson family taken to be 1)
+# 
+#     Null deviance: 168.25  on 69  degrees of freedom
+# Residual deviance: 102.98  on 67  degrees of freedom
+# AIC: 176.14
+# 
+# Number of Fisher Scoring iterations: 6
+```
+
+---
+
+# Exercise 2: Solution
+
+
+```r
+ggplot(aes(x = WatrCont, y = Galumna), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = "poisson")) +
+  labs(title = "Poisson Model") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-42-1.png" height="350" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Overdispersion in count data
+
+- The residual deviance is defined as twice the difference between the log likelihood of a model that provides a perfect fit and the log likelihood of our model
+
+`$$\text{Res dev} = 2 \, log(L(y;\,y)) - 2 \, log(L(y;\, \mu))$$`
+
+- In a Poisson GLM, the residual deviance should equal the residual degrees of freedoms
+
+--
+
+.center[.alert[Here: 102.98 &gt;&gt; 67]]
+
+--
+
+- When the residual deviance is higher than the residual degrees of freedom we say that the model is **overdispersed**
+
+
+- Occurs when the variance in the data is even higher than the mean, hence the Poisson distribution is not the best choice (many zeros, many very high values, missing covariates, etc)
+
+---
+
+# Use other distributions
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Canonical Link &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Variance Function &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; identity &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasipoisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μθ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1−μ) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasibinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1 − μ)θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Negative Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ+kμ^2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Gamma &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; inverse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1/μ2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ3 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+# Use other distributions
+
+&amp;nbsp;
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Canonical Link &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Variance Function &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; identity &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-weight: bold;color: white !important;background-color: #D7261E !important;"&gt; Quasipoisson &lt;/td&gt;
+   &lt;td style="text-align:left;font-weight: bold;color: white !important;background-color: #D7261E !important;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;font-weight: bold;color: white !important;background-color: #D7261E !important;"&gt; μθ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1−μ) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Quasibinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1 − μ)θ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Negative Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ+kμ^2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Gamma &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; inverse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Inverse Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1/μ2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ3 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+# Quasi-Poisson GLM
+
+The **systematic part** and the **link function** remain the same as in a Poisson GLM but the variance changes with
+
+`$$Var(Y_I) = \phi \times \mu_i$$`
+
+instead of
+
+`$$Var(Y_I) = \mu_i$$`
+
+--
+
+`\(\phi\)` is the dispersion parameter. It will be estimated prior to estimate parameters. Correcting for overdispersion will not affect parameter estimates but will affect their **significance**. Indeed, the standard errors of the parameters are multiplied by `\(\sqrt{\phi}\)`
+
+&amp;nbsp;
+
+.center[
+.alert[Some marginally significant p-values may no longer hold!]
+]
+
+---
+
+# Quasi-Poisson GLM
+
+Create a new GLM using the 'quasipoisson' family or update the previous one
+
+
+```r
+glm.quasipoisson &lt;- glm(Galumna ~ WatrCont + Topo, data=mites,
+family = quasipoisson)
+
+glm.quasipoisson &lt;- update(glm.poisson,family = quasipoisson)
+```
+
+--
+
+When comparing the outputs with a poisson model see:
+
+- changes in the *se* of the coefficients
+- the AIC `\(\Rightarrow\)` The quasi-Poisson is not a full maximum likelihood (ML) model but a quasi-ML model, so that the AIC is not defined
+
+---
+
+.pull-left[
+
+```r
+summary(glm.quasipoisson)
+# 
+# Call:
+# glm(formula = Galumna ~ WatrCont + Topo, family = quasipoisson, 
+#     data = mites)
+# 
+# Deviance Residuals: 
+#     Min       1Q   Median       3Q      Max  
+# -1.8977  -0.9760  -0.6431  -0.1651   4.0743  
+# 
+# Coefficients:
+#              Estimate Std. Error t value Pr(&gt;|t|)    
+# (Intercept)  1.937184   0.666256   2.908 0.004935 ** 
+# WatrCont    -0.006736   0.001699  -3.965 0.000181 ***
+# TopoHummock  0.615095   0.416250   1.478 0.144172    
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# (Dispersion parameter for quasipoisson family taken to be 2.197067)
+# 
+#     Null deviance: 168.25  on 69  degrees of freedom
+# Residual deviance: 102.98  on 67  degrees of freedom
+# AIC: NA
+# 
+# Number of Fisher Scoring iterations: 6
+```
+]
+
+.pull-right[
+
+```r
+summary(glm.poisson)
+# 
+# Call:
+# glm(formula = Galumna ~ WatrCont + Topo, family = poisson(link = "log"), 
+#     data = mites)
+# 
+# Deviance Residuals: 
+#     Min       1Q   Median       3Q      Max  
+# -1.8977  -0.9760  -0.6431  -0.1651   4.0743  
+# 
+# Coefficients:
+#              Estimate Std. Error z value Pr(&gt;|z|)    
+# (Intercept)  1.937184   0.449489   4.310 1.63e-05 ***
+# WatrCont    -0.006736   0.001146  -5.877 4.17e-09 ***
+# TopoHummock  0.615095   0.280823   2.190   0.0285 *  
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# (Dispersion parameter for poisson family taken to be 1)
+# 
+#     Null deviance: 168.25  on 69  degrees of freedom
+# Residual deviance: 102.98  on 67  degrees of freedom
+# AIC: 176.14
+# 
+# Number of Fisher Scoring iterations: 6
+```
+]
+
+---
+
+.pull-left[
+
+
+```r
+ggplot(aes(x = WatrCont, y = Galumna), 
+    data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "quasipoisson")) +
+  labs(title = "Quasipoisson Model") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-48-1.png" height="350" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+
+```r
+ggplot(aes(x = WatrCont, y = Galumna), 
+    data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", 
+    method.args = list(family = "poisson")) +
+  labs(title = "Poisson Model") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-49-1.png" height="350" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Degree of overdispersion
+
+The degree of overdispersion can be computed as
+
+`$$\phi \, = \, \frac{\text{Residual deviance}}{\text{Residual degrees of freedom}}$$`
+
+&gt; In our case : `\(102.98/67 = 1.537\)`
+
+Depending on the degree of overdispersion, solutions may be :
+
+.pull-left[
+
+&amp;nbsp;
+
+1. Correct for overdispersion using **quasi-Poisson GLM**
+2. Choose another distribution: **the negative binomial**
+]
+
+.pull-right[
+&lt;img src="images/dispParam.png" width="500" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Negative binomial GLM
+
+Negative binomial GLMs are favor when overdispersion is high
+
+- It has **two parameters** `\(\mu\)` and `\(k\)`. `\(k\)` controls for the dispersion parameter (smaller `\(k\)` indicates higher dispersion)
+- It corresponds to a combination of two distributions (**Poisson** and **gamma**)
+- It assumes that the `\(Y_i\)` are Poisson distributed with the mean `\(\mu\)` assumed to follow a gamma distribution
+
+`$$E(Y_i) = \mu_i$$`
+
+`$$Var(Y_i) = \mu_i + \frac{\mu^2_i}{k}$$`
+
+---
+
+# Fitting a negative binomial in R
+
+Negative Binomial is not in the `glm()` function so you need the `MASS` package
+
+```r
+install.packages('MASS')
+```
+
+
+```r
+glm.negbin &lt;- MASS::glm.nb(Galumna ~ WatrCont + Topo, data=mites)
+```
+
+
+```r
+summary(glm.negbin)
+```
+
+---
+
+.pull-left2[
+.small[
+
+```
+# 
+# Call:
+# MASS::glm.nb(formula = Galumna ~ WatrCont + Topo, data = mites, 
+#     init.theta = 0.9528403246, link = log)
+# 
+# Deviance Residuals: 
+#     Min       1Q   Median       3Q      Max  
+# -1.4964  -0.8113  -0.5068  -0.1635   2.5071  
+# 
+# Coefficients:
+#              Estimate Std. Error z value Pr(&gt;|z|)    
+# (Intercept)  2.346171   0.746735   3.142  0.00168 ** 
+# WatrCont    -0.008303   0.001863  -4.456 8.34e-06 ***
+# TopoHummock  0.832092   0.423744   1.964  0.04957 *  
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# (Dispersion parameter for Negative Binomial(0.9528) family taken to be 1)
+# 
+#     Null deviance: 88.685  on 69  degrees of freedom
+# Residual deviance: 51.295  on 67  degrees of freedom
+# AIC: 159.76
+# 
+# Number of Fisher Scoring iterations: 1
+# 
+# 
+#               Theta:  0.953 
+#           Std. Err.:  0.413 
+# 
+#  2 x log-likelihood:  -151.763
+```
+]]
+.pull-right2[
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+`theta` `\(= k\)`
+]
+
+---
+
+class: inverse, center, middle
+
+# In summary
+
+---
+
+.small[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Names &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Distribution &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Link function &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Applications &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Regression, ANOVA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Identity &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Normal homoscedastic unbounded data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Logistic Regression &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Presence/absence data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Logistic Regression &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log-log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Presence/absence dat with many 0s or many 1s &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Probit Analysis &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; probit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Proportions &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Probit Analysis &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quasininomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; probit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Proportions with overdispersion &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Log-linear model &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Count data &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Log-linear model &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quasipoisson &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Count data with overdispersion &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Negative binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Negative binomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Count data with strong overdispersion &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ordinal Regression &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Multinomial &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Multiclass data (factors with multiple states) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+
+class: inverse, center, middle
+
+# GLMM
+
+---
+
+# Generalized Linear Mixed Models
+
+Extension of GLMs to account for additional structure in the data
+
+Follows similar steps introduced for Linear Mixed Models (LMM)
+
+1. LMMs incorporate random effects
+2. GLMs handle non-normal data (letting errors take on different distribution families)
+
+
+```r
+library(lme4)
+
+mod &lt;- glmer(y ~ x1*x2 + x3 + (1|site/quadrat), data = df, family ="poison")
+```
+
+.footnote[
+Too slow ? Try different [optimizers](http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/)
+]
+
+---
+
+---
+
+class: center
+
+## Ressources
+
+&amp;nbsp;
+
+&lt;img src="images/book_zuur.jpg" width="300" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"countIncrementalSlides": true,
+"highlithLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
