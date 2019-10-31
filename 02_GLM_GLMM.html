@@ -1103,22 +1103,82 @@ summary(logit.reg)
 # Number of Fisher Scoring iterations: 6
 ```
 
----
-
 # Exercise 1: Solution
 
 
 ```r
-library(ggplot2)
+par(mfrow=c(2,2))
+plot(logit.reg)
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+
+
+```r
 ggplot(aes(x = WatrCont, y = pa), data=mites) +
   geom_point(alpha = 0.2) +
-  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
-  labs(title = "Logistic Regression Model") +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "logit"))) +
+  labs(title = "Binomial logit") +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-31-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-33-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
+---
+
+
+```r
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "probit"))) +
+  labs(title = "Binomial probit") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-34-1.png" height="450" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "cauchit"))) +
+  labs(title = "Binomial cauchit") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-35-1.png" height="450" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "cloglog"))) +
+  labs(title = "Binomial log-log") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-36-1.png" height="450" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = poisson(link = "log"))) +
+  labs(title = "Poisson log : Inappropriate distribution and link for this type data ") +
+  theme_linedraw()
+```
+
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-37-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1167,7 +1227,7 @@ exp(logit.reg$coefficient[2])
 # 0.9843118
 ```
 
-&gt; One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.2
+&gt; One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.02
 
 - **On the probability scale for water content:**
 
@@ -1358,12 +1418,12 @@ summary(glm.poisson)
 ```r
 ggplot(aes(x = WatrCont, y = Galumna), data=mites) +
   geom_point(alpha = 0.2) +
-  geom_smooth(method = "glm", method.args = list(family = "poisson")) +
-  labs(title = "Poisson Model") +
+  geom_smooth(method = "glm", method.args = list(family = poisson(link = "log"))) +
+  labs(title = "Poisson log") +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-42-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-48-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1619,12 +1679,13 @@ ggplot(aes(x = WatrCont, y = Galumna),
     data=mites) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = "glm", 
-    method.args = list(family = "quasipoisson")) +
+    method.args = list(
+      family = "quasipoisson")) +
   labs(title = "Quasipoisson Model") +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-48-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-54-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1636,14 +1697,17 @@ ggplot(aes(x = WatrCont, y = Galumna),
     data=mites) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = "glm", 
-    method.args = list(family = "poisson")) +
+    method.args = list(
+      family = "poisson")) +
   labs(title = "Poisson Model") +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-49-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-55-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ]
+
+.footnote[Note the confidence interval]
 
 ---
 
@@ -1853,8 +1917,6 @@ mod &lt;- glmer(y ~ x1*x2 + x3 + (1|site/quadrat), data = df, family ="poison")
 .footnote[
 Too slow ? Try different [optimizers](http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/)
 ]
-
----
 
 ---
 

@@ -963,11 +963,34 @@ ggplot(data = d,
 
 ---
 
+# Plotting marginal effects
+
+.pull-left[
+```{r marg-plot1, eval = TRUE}
+sjPlot::plot_model(mod, 
+                   type = "pred", 
+                   terms = "Sepal.Length")
+```
+]
+
+
+.pull-right[
+```{r marg-plot2, eval = TRUE}
+sjPlot::plot_model(mod, 
+                   type = "pred", 
+                   terms = "Species")
+```
+]
+
+
+---
+
 # Interaction terms
 
 ```{r}
+# Model the species separately
 lm(Sepal.Width ~ Sepal.Length, data=iris %>% filter(Species == "versicolor"))$coef
-
+# Model using the interaction term
 lm(Sepal.Width ~ Sepal.Length*Species - 1, data=iris)$coef
 ```
 
@@ -1676,6 +1699,63 @@ knitr::include_graphics("images/lake_data.png")
 ```
 
 ]
+
+---
+
+# Answers
+
+```{r}
+data <- read.csv("data/lake_data.csv", header = T)
+pairs(data)
+
+ggplot(aes(x= Fish_Length, y=Trophic_Pos, colour = Fish_Species), data = data) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+---
+
+.small[
+```{r}
+# Full model with varying intercepts
+M1 <- lmer(Trophic_Pos ~ Fish_Length + (1 | Fish_Species) + (1 | Lake), 
+           data = data, REML = TRUE)
+# Full model with varying intercepts and slopes
+M2 <- lmer(Trophic_Pos ~ Fish_Length + (1 + Fish_Length | Fish_Species) + 
+           (1 + Fish_Length | Lake),
+           data = data, REML = TRUE)
+# No Lake, varying intercepts only
+M3 <- lmer(Trophic_Pos ~ Fish_Length + (1 | Fish_Species), 
+           data = data, REML = TRUE)
+# No Species, varying intercepts only
+M4 <- lmer(Trophic_Pos ~ Fish_Length + (1 | Lake), 
+           data = data, REML = TRUE)
+# No Lake, varying intercepts and slopes
+M5 <- lmer(Trophic_Pos ~ Fish_Length + (1 + Fish_Length | Fish_Species), 
+           data = data, REML = TRUE)
+# No Lake, varying slopes
+M5.2 <- lmer(Trophic_Pos ~ Fish_Length + (0 + Fish_Length | Fish_Species), 
+             data = data, REML = TRUE)
+# No Species, varying intercepts and slopes
+M6 <- lmer(Trophic_Pos ~ Fish_Length + (1 + Fish_Length | Lake), 
+           data = data, REML = TRUE)
+# Full model with varying intercepts and slopes only varying by lake
+M7 <- lmer(Trophic_Pos ~ Fish_Length + (1 | Fish_Species) + (1 + Fish_Length | Lake),
+           data = data, REML = TRUE)
+# Full model with varying intercepts and slopes only varying by species
+M8 <- lmer(Trophic_Pos ~ Fish_Length + (1 + Fish_Length | Fish_Species) + (1 | Lake),
+           data = data, REML = TRUE)
+```
+]
+
+---
+
+# Comparison of the models
+
+```{r}
+wiqid::AICtable(MuMIn::AICc(M1,M2,M3,M4,M5,M6,M7,M8), digits=3, sort = TRUE)
+```
 
 ---
 

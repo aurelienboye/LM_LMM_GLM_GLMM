@@ -1020,19 +1020,66 @@ logit.reg <- glm(pa ~ WatrCont + Topo, data=mites, family = binomial(link = "log
 summary(logit.reg)
 ```
 
----
-
 # Exercise 1: Solution
 
-```{r, out.height = 350}
+```{r}
+par(mfrow=c(2,2))
+plot(logit.reg)
+```
+
+---
+
+```{r, echo = FALSE}
 library(ggplot2)
+```
+
+```{r, out.height = 450}
 ggplot(aes(x = WatrCont, y = pa), data=mites) +
   geom_point(alpha = 0.2) +
-  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
-  labs(title = "Logistic Regression Model") +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "logit"))) +
+  labs(title = "Binomial logit") +
   theme_linedraw()
 ```
 
+---
+
+```{r, out.height = 450}
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "probit"))) +
+  labs(title = "Binomial probit") +
+  theme_linedraw()
+```
+
+---
+
+```{r, out.height = 450}
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "cauchit"))) +
+  labs(title = "Binomial cauchit") +
+  theme_linedraw()
+```
+
+---
+
+```{r, out.height = 450}
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = binomial(link = "cloglog"))) +
+  labs(title = "Binomial log-log") +
+  theme_linedraw()
+```
+
+---
+
+```{r, out.height = 450}
+ggplot(aes(x = WatrCont, y = pa), data=mites) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "glm", method.args = list(family = poisson(link = "log"))) +
+  labs(title = "Poisson log : Inappropriate distribution and link for this type data ") +
+  theme_linedraw()
+```
 
 ---
 
@@ -1073,7 +1120,7 @@ $$logit^{-1} = \frac{1}{1 + \frac{1}{e^x}}$$
 exp(logit.reg$coefficient[2])
 ```
 
-> One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.2
+> One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.02
 
 - **On the probability scale for water content:**
 
@@ -1196,8 +1243,8 @@ summary(glm.poisson)
 ```{r, out.height = 350}
 ggplot(aes(x = WatrCont, y = Galumna), data=mites) +
   geom_point(alpha = 0.2) +
-  geom_smooth(method = "glm", method.args = list(family = "poisson")) +
-  labs(title = "Poisson Model") +
+  geom_smooth(method = "glm", method.args = list(family = poisson(link = "log"))) +
+  labs(title = "Poisson log") +
   theme_linedraw()
 ```
 
@@ -1380,7 +1427,8 @@ ggplot(aes(x = WatrCont, y = Galumna),
     data=mites) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = "glm", 
-    method.args = list(family = "quasipoisson")) +
+    method.args = list(
+      family = "quasipoisson")) +
   labs(title = "Quasipoisson Model") +
   theme_linedraw()
 ```
@@ -1394,12 +1442,15 @@ ggplot(aes(x = WatrCont, y = Galumna),
     data=mites) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = "glm", 
-    method.args = list(family = "poisson")) +
+    method.args = list(
+      family = "poisson")) +
   labs(title = "Poisson Model") +
   theme_linedraw()
 ```
 
 ]
+
+.footnote[Note the confidence interval]
 
 ---
 
