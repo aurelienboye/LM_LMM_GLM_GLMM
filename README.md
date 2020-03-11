@@ -1,5 +1,3 @@
-# Workshop material: Linear Models / Linear Mixed Models and Generalized Linear (Mixed) Models
-
 ## Slides
 
 The slides for the LM/LMM lecture can be found [here](https://aurelienboye.github.io/LM_LMM_GLM_GLMM/01_LM_LMM.html). 
