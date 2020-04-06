@@ -10,7 +10,7 @@ Code to create the slides can be found in the `.rmd` files
 
 ## Data
 
-Data for the exercise can either be directly download from R or found in the data folder
+Data for the exercise can either be directly download from R or found in the data folder of the [Github repository](https://github.com/aurelienboye/LM_LMM_GLM_GLMM)
 
 ## Credits 
 
