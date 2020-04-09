@@ -595,8 +595,22 @@ where `\(D()\)` is a distribution, with mean `\(\mu_i\)` and the variance depend
 
 .small[
 
-- The error distribution `\(D()\)` is from the exponential family (*e.g.* Normal, Poisson, Binomial...)
+- The error distribution `\(D()\)` is from the exponential family (*e.g.* Normal, Poisson, Binomial...) :
 
+]
+
+--
+
+.center[
+
+`\(f(y|\theta,\phi) = exp \left( {\frac{y\theta - b(\theta)}{a(\phi)}+c(y, \phi)} \right)\)`
+
+]
+
+&amp;nbsp;
+
+.small[
+where `\(a(·)\)`, `\(b(·)\)` and `\(c(·)\)` are functions, `\(\theta\)` is the **natural parameter** (the parameter of interest) , and `\(\phi\)` is a scale parameter (known or seen as a nuisance)
 ]
 
 ---
@@ -710,19 +724,13 @@ Generalized linear models (GLMs) build on this approach. In general, they can be
 
 where `\(D()\)` is a distribution, with mean `\(\mu_i\)` and the variance depending on `\(\phi\)` 
 
-.small[
-
-- The error distribution `\(D()\)` is from the exponential family (*e.g.* Normal, Poisson, Binomial...)
-
-]
-
 --
 
 .small[
 
-- The variance `\(\phi\)` is a function of the fitted values `\(var(Y_i) = \theta V(\mu_i)\)` and it may be constant (Poisson distribution) or estimated from the data (Normal distribution)
-  - For the Normal distribution `\(var(\mu_i) = \theta \times 1\)` as `\(V(\mu_i)=1\)` so that `\(\phi = \sigma^2\)`
-  - For the Poisson distribution  `\(var(\mu_i) = \theta \times \mu_i\)` as `\(V(\mu_i)=\mu_i\)` 
+- The variance is a [function](https://en.wikipedia.org/wiki/Variance_function) of the fitted values `\(var(Y_i) = \phi V(\mu_i)\)` where the dispersion parameter `\(\phi\)` is a constant (that may be estimated from the data e.g. for the Normal distribution)
+  - For the Normal distribution `\(var(Y_i) = \phi \times 1\)` as `\(V(\mu_i)=1\)` : it is constant with `\(\phi = \sigma^2\)` estimated from the data
+  - For the Poisson distribution `\(var(Y_i) =  1 \times \mu_i\)` as `\(V(\mu_i)=\mu_i\)` : the variance increases with predicted values
 
 ]
 
@@ -766,8 +774,6 @@ Generalized linear models (GLMs) build on this approach. In general, they can be
 
 &amp;nbsp;
 
-.pull-left[
-
 .center[
 
 `\(y_i \sim D(\mu_i,\phi)~~~~~\)`   **(1)**
@@ -777,15 +783,10 @@ Generalized linear models (GLMs) build on this approach. In general, they can be
 `\(\eta_i = \sum_{j=1}^s \beta_j x_{ij}~\)`  **(3)**
 
 ]
-]
-
-.pull-right[
-&lt;img src="images/glm_link.png" width="600" style="display: block; margin: auto;" /&gt;
-]
 
 &amp;nbsp;
 
-**Some common links**
+**Some common link functions `\(g()\)`**
 
 - Identity: `\(\mu = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = \alpha + \beta x\)`
 - Log: `\(log(\mu) = \eta~~~\)` .comment[*e.g.*] `\(~~~\mu = e^{\alpha + \beta x}\)`
@@ -794,9 +795,7 @@ Generalized linear models (GLMs) build on this approach. In general, they can be
 
 ---
 
-# The link functions
-
-&amp;nbsp;
+# The .comment[canonical] link functions
 
 .pull-left[
 
@@ -812,14 +811,24 @@ Generalized linear models (GLMs) build on this approach. In general, they can be
 ]
 
 .pull-right[
+
+with `\(D()\)` in the form of 
+
+&amp;nbsp;
+
+`\(f(y|\theta,\phi) = exp \left( {\frac{y\theta - b(\theta)}{a(\phi)}+c(y, \phi)} \right)\)`
+
+]
+
+&amp;nbsp;
+
+.center[
 &lt;img src="images/glm_link.png" width="500" style="display: block; margin: auto;" /&gt;
 ]
 
 &amp;nbsp;
 
-**Canonical links**
-
-`\(g\)` is called a **canonical link function** when
+`\(g\)` is called a **canonical link function** when 
 
 `$$\gamma'^{-1} \circ g^{-1} = (g\circ \gamma')^{-1} = I$$`
 
@@ -843,7 +852,7 @@ so that `\(g\)` connects `\(\eta\)`, `\(\mu\)`, and `\(\theta\)` such that `\(\t
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Normal &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; identity &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; θ &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ϕ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Poisson &lt;/td&gt;
@@ -853,7 +862,7 @@ so that `\(g\)` connects `\(\eta\)`, `\(\mu\)`, and `\(\theta\)` such that `\(\t
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Quasipoisson &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; log &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; μθ &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μϕ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Binomial &lt;/td&gt;
@@ -863,7 +872,7 @@ so that `\(g\)` connects `\(\eta\)`, `\(\mu\)`, and `\(\theta\)` such that `\(\t
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Quasibinomial &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; logit &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; μ(1 − μ)θ &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μ(1 − μ)ϕ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Negative Binomial &lt;/td&gt;
@@ -1111,7 +1120,7 @@ par(mfrow=c(2,2))
 plot(logit.reg)
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1126,7 +1135,7 @@ ggplot(aes(x = WatrCont, y = pa), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-33-1.png" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-32-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1139,7 +1148,7 @@ ggplot(aes(x = WatrCont, y = pa), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-34-1.png" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-33-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1152,7 +1161,7 @@ ggplot(aes(x = WatrCont, y = pa), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-35-1.png" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-34-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1165,7 +1174,118 @@ ggplot(aes(x = WatrCont, y = pa), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-36-1.png" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-35-1.png" height="450" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Which one to use ?
+
+&amp;nbsp;
+
+- **Coefficient of discrimination (D)** assess the predictive power of a logistic regression in terms of classification success or failure
+
+- **Test de Hosmer-Lemeshow**: compare the number of observed *vs* expected values (similar to a `\(Chi^2\)` test)
+  - Non significant p-value indicate adequate fit
+
+---
+
+# Coefficient D
+
+.small[
+
+```r
+logit.reg &lt;- glm(pa ~ WatrCont + Topo, data=mites, family = binomial(link = "logit"))
+
+cauchit.reg &lt;- glm(pa ~ WatrCont + Topo, data=mites, family = binomial(link = "cauchit"))
+
+binomTools::Rsq(object = logit.reg)
+# 
+# R-square measures and the coefficient of discrimination, 'D':
+# 
+#      R2mod     R2res     R2cor         D
+#  0.5205221 0.5024101 0.5025676 0.5114661
+# 
+# Number of binomial observations:  70
+# Number of binary observation:  70
+# Average group size:  1
+binomTools::Rsq(object = cauchit.reg)
+# 
+# R-square measures and the coefficient of discrimination, 'D':
+# 
+#      R2mod     R2res     R2cor         D
+#  0.5045138 0.5004369 0.5010976 0.5024754
+# 
+# Number of binomial observations:  70
+# Number of binary observation:  70
+# Average group size:  1
+```
+]
+
+---
+
+# Hosmer-Lemeshow test (logit)
+
+.small[
+
+```r
+binomTools::HLtest(binomTools::Rsq(logit.reg))
+# 
+# Hosmer and Lemeshow's goodness-of-fit test for logistic regression models
+# with method = deciles
+# Observed counts:
+#  1 2 3 4 5 6 7 8 9 10
+#  7 7 7 6 5 6 3 2 2  0
+#  0 0 0 1 2 1 4 5 5  7
+# 
+# Expected counts:
+#  1   2   3   4   5   6   7   8 9  10
+#  7 6.9 6.7 6.3 5.8 5.2 3.7 2.3 1 0.2
+#  0 0.1 0.3 0.7 1.2 1.8 3.3 4.7 6 6.8
+# 
+# Pearson residuals:
+#     1    2    3    4    5    6    7    8    9   10
+#   0.0  0.0  0.1 -0.1 -0.3  0.4 -0.3 -0.2  1.0 -0.5
+#  -0.1 -0.3 -0.6  0.3  0.7 -0.6  0.4  0.1 -0.4  0.1
+# 
+# Chi-square statistic:  3.421693  with  8  df
+# P-value:  0.9051814 
+# 
+# Warning: Test may not be appropriate due to low expected frequencies
+```
+]
+
+---
+
+# Hosmer-Lemeshow test (cauchit)
+
+.small[
+
+```r
+binomTools::HLtest(binomTools::Rsq(cauchit.reg))
+# 
+# Hosmer and Lemeshow's goodness-of-fit test for logistic regression models
+# with method = deciles
+# Observed counts:
+#  1 2 3 4 5 6 7 8 9 10
+#  7 7 7 6 5 6 3 2 2  0
+#  0 0 0 1 2 1 4 5 5  7
+# 
+# Expected counts:
+#    1   2   3   4   5   6   7   8   9  10
+#  6.7 6.6 6.4 6.2 5.9 5.4 3.8 1.7 0.9 0.5
+#  0.3 0.4 0.6 0.8 1.1 1.6 3.2 5.3 6.1 6.5
+# 
+# Pearson residuals:
+#     1    2    3    4    5    6    7    8    9   10
+#   0.1  0.2  0.2 -0.1 -0.4  0.3 -0.4  0.2  1.2 -0.7
+#  -0.5 -0.6 -0.8  0.3  0.9 -0.5  0.4 -0.1 -0.5  0.2
+# 
+# Chi-square statistic:  5.231125  with  8  df
+# P-value:  0.7326116 
+# 
+# Warning: Test may not be appropriate due to low expected frequencies
+```
+]
 
 ---
 
@@ -1178,7 +1298,7 @@ ggplot(aes(x = WatrCont, y = pa), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-37-1.png" height="450" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-39-1.png" height="450" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1201,13 +1321,16 @@ summary(logit.reg)$coefficients
 
 # Exercise 1: Interpreting the output
 
+&amp;nbsp;
 
-Remember we used a logit transformation on the expected values!
+**Remember we used a logit transformation on the expected values!**
 
-`\(\Rightarrow\)` to properly interpret the regression parameters, we have to use a **'reverse' function** :
+&amp;nbsp;
+
+To properly interpret the regression parameters, we have to use a **'reverse' function**
 
 - The natural exponential function to obtain the **odds**: `\(e^x\)`
-  - An odds ratio represents the ratio of the odds that an event will occur (event = 1) given the presence of the predictor x (x = 1), compared to the odds of the event occurring in the absence of that predictor (x = 0).
+  - `\(Odds = \frac{p}{1-p}\)` with `\(p\)` the probability of success
   - Beta coefficient in logistic regressions correspond to the log of the odds ratio for a given predictor
 
 - The inverse logit function to obtain the **probabilities**:
@@ -1218,28 +1341,51 @@ Remember we used a logit transformation on the expected values!
 
 # Exercise 1: Interpreting the output
 
-- **On the odds scale for water content:**
+- **On the odds scale**
 
 
 ```r
+exp(logit.reg$coefficient[1])
+# (Intercept) 
+#    86.86907
 exp(logit.reg$coefficient[2])
 #  WatrCont 
 # 0.9843118
 ```
 
-&gt; One unit increase in water content will decrease the odds that the species is present (event = 1) by 0.02
+&gt; - The odds of the species being present when water content is 0 is 86.86 
+- One unit increase in water content will multiply the odds of the species being present by 0.988 `\(\Rightarrow\)` decreases the odds
 
-- **On the probability scale for water content:**
+---
+
+# Exercise 1: Interpreting the output
+
+- **On the probability scale** 
+
+.small[You cannot just add the proba ! See [here](https://sebastiansauer.github.io/convert_logit2prob/) for further explanations]
+
+.small[
 
 
 ```r
-1 / (1 + 1/exp(logit.reg$coefficient[2]))
-#  WatrCont 
-# 0.4960469
+1 / (1 + 1/exp(logit.reg$coefficient[1]))
+# (Intercept) 
+#   0.9886194
+1 / (1 + 1/exp(logit.reg$coefficient[1] + 1 * logit.reg$coefficient[2]))
+# (Intercept) 
+#   0.9884401
+1 / (1 + 1/exp(logit.reg$coefficient[1] + 100 * logit.reg$coefficient[2]))
+# (Intercept) 
+#    0.947007
+1 / (1 + 1/exp(logit.reg$coefficient[1] + 500 * logit.reg$coefficient[2]))
+# (Intercept) 
+#  0.03101209
 ```
 
-&gt; One unit increase in water content will decrease the probability of the species occuring (proba &lt; 0.5)
-
+&gt;- The probability of presence when water content is 0 is 0.98
+&gt;- One unit increase in water content will slightly decrease the probability of the species occuring
+&gt;- When water content is 100, the proba of the species occuring is 0.947
+]
 ---
 
 # Exercise 1: Interpreting the output
@@ -1423,7 +1569,7 @@ ggplot(aes(x = WatrCont, y = Galumna), data=mites) +
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-48-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-50-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1607,7 +1753,7 @@ When comparing the outputs with a poisson model see:
 
 ---
 
-.pull-left[
+
 
 ```r
 summary(glm.quasipoisson)
@@ -1636,9 +1782,10 @@ summary(glm.quasipoisson)
 # 
 # Number of Fisher Scoring iterations: 6
 ```
-]
 
-.pull-right[
+---
+
+
 
 ```r
 summary(glm.poisson)
@@ -1667,7 +1814,6 @@ summary(glm.poisson)
 # 
 # Number of Fisher Scoring iterations: 6
 ```
-]
 
 ---
 
@@ -1685,7 +1831,7 @@ ggplot(aes(x = WatrCont, y = Galumna),
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-54-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-56-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1703,7 +1849,7 @@ ggplot(aes(x = WatrCont, y = Galumna),
   theme_linedraw()
 ```
 
-&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-55-1.png" height="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="02_GLM_GLMM_files/figure-html/unnamed-chunk-57-1.png" height="350" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1926,7 +2072,15 @@ class: center
 
 &amp;nbsp;
 
+.pull-left[
+GLMM for ecologists (http://glmm.wikidot.com)
+]
+
+.pull-right[
+
 &lt;img src="images/book_zuur.jpg" width="300" style="display: block; margin: auto;" /&gt;
+
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
