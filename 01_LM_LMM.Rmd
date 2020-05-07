@@ -589,8 +589,6 @@ Slopes = expected change in the response due to a change of one **standard devia
 
 --
 
-&nbsp;
-
 .comment[
 .small[
 
