@@ -1,3 +1,5 @@
 theme: jekyll-theme-minimal
-title: [Workshop material for Linear Models / Linear Mixed Models and Generalized Linear (Mixed) Models]
-
+title: [Workshop material for GLMMs]
+logo: /images/logo_ifremer.png
+show_downloads: true
+google_analytics:
